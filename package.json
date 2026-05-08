@@ -1,0 +1,14 @@
+{
+  "name": "resume-editor",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @resume-editor/web dev",
+    "build": "pnpm --filter @resume-editor/web build",
+    "start": "pnpm --filter @resume-editor/web start",
+    "lint": "pnpm --filter @resume-editor/web lint"
+  },
+  "devDependencies": {
+    "typescript": "5.7.3"
+  }
+}

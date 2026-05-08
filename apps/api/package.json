@@ -1,0 +1,13 @@
+{
+  "name": "@resume-editor/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'API server placeholder - implement your backend here'",
+    "build": "echo 'API build placeholder'"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "5.7.3"
+  }
+}
