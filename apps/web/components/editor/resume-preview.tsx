@@ -1,5 +1,6 @@
 'use client'
 
+import { cn } from '@/lib/utils'
 import { useResume } from '@/lib/resume-context'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
@@ -14,16 +15,56 @@ function formatDate(dateStr: string) {
 
 export function ResumePreview() {
   const { state } = useResume()
-  const { personalInfo, workExperience, education, skills, projects } = state.data
+  const { personalInfo, workExperience, education, skills, projects, style } = state.data
+  const fontFamilyMap = {
+    inter: '"Inter", system-ui, sans-serif',
+    'noto-sans-sc': '"Noto Sans SC", "PingFang SC", sans-serif',
+    georgia: 'Georgia, serif',
+    'jetbrains-mono': '"JetBrains Mono", monospace',
+  }
+  const spacingMap = {
+    compact: {
+      section: 'mb-5',
+      sectionTitle: 'mb-3',
+      list: 'space-y-3',
+      card: 'space-y-2',
+    },
+    comfortable: {
+      section: 'mb-6',
+      sectionTitle: 'mb-4',
+      list: 'space-y-4',
+      card: 'space-y-3',
+    },
+    airy: {
+      section: 'mb-8',
+      sectionTitle: 'mb-5',
+      list: 'space-y-5',
+      card: 'space-y-4',
+    },
+  }
+  const marginMap = {
+    narrow: 'p-6',
+    normal: 'p-8',
+    wide: 'p-10',
+  }
+  const previewStyle = spacingMap[style.spacing]
 
   return (
     <div className="flex h-full flex-col bg-editor-preview">
       <ScrollArea className="flex-1 p-6">
-        <div className="resume-preview mx-auto max-w-[210mm] rounded-lg bg-resume-paper p-8 shadow-lg">
-          {/* Header - Personal Info */}
-          <header className="mb-6">
+        <div
+          className={cn(
+            'resume-preview mx-auto max-w-[210mm] rounded-2xl bg-resume-paper shadow-lg',
+            marginMap[style.margin],
+          )}
+          style={{
+            ['--resume-accent' as string]: style.accentColor,
+            fontFamily: fontFamilyMap[style.fontFamily],
+          }}
+        >
+          <header className={previewStyle.section}>
             <h1 className="text-3xl font-bold text-foreground">{personalInfo.name}</h1>
-            <p className="mt-1 text-lg text-primary">{personalInfo.title}</p>
+            <p className="mt-1 text-lg text-[var(--resume-accent)]">{personalInfo.title}</p>
 
             <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
               {personalInfo.email && (
@@ -92,13 +133,14 @@ export function ResumePreview() {
             )}
           </header>
 
-          <Separator className="my-6" />
+          <Separator className={cn('my-6', style.spacing === 'airy' && 'my-7')} />
 
-          {/* Work Experience */}
           {workExperience.length > 0 && (
-            <section className="mb-6">
-              <h2 className="mb-4 text-lg font-semibold text-foreground">工作经历</h2>
-              <div className="space-y-5">
+            <section className={previewStyle.section}>
+              <h2 className={cn('text-lg font-semibold text-foreground', previewStyle.sectionTitle)}>
+                工作经历
+              </h2>
+              <div className={previewStyle.list}>
                 {workExperience.map((exp) => (
                   <div key={exp.id}>
                     <div className="flex items-start justify-between">
@@ -120,7 +162,7 @@ export function ResumePreview() {
                       <ul className="mt-2 space-y-1">
                         {exp.highlights.map((highlight, i) => (
                           <li key={i} className="flex text-sm text-foreground/80">
-                            <span className="mr-2 text-primary">•</span>
+                            <span className="mr-2 text-[var(--resume-accent)]">•</span>
                             {highlight}
                           </li>
                         ))}
@@ -132,11 +174,12 @@ export function ResumePreview() {
             </section>
           )}
 
-          {/* Education */}
           {education.length > 0 && (
-            <section className="mb-6">
-              <h2 className="mb-4 text-lg font-semibold text-foreground">教育背景</h2>
-              <div className="space-y-4">
+            <section className={previewStyle.section}>
+              <h2 className={cn('text-lg font-semibold text-foreground', previewStyle.sectionTitle)}>
+                教育背景
+              </h2>
+              <div className={previewStyle.list}>
                 {education.map((edu) => (
                   <div key={edu.id}>
                     <div className="flex items-start justify-between">
@@ -154,7 +197,11 @@ export function ResumePreview() {
                     {edu.highlights.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
                         {edu.highlights.map((highlight, i) => (
-                          <Badge key={i} variant="secondary" className="text-xs">
+                          <Badge
+                            key={i}
+                            variant="secondary"
+                            className="border-transparent bg-[color:var(--resume-accent)]/12 text-xs text-[var(--resume-accent)]"
+                          >
                             {highlight}
                           </Badge>
                         ))}
@@ -166,17 +213,22 @@ export function ResumePreview() {
             </section>
           )}
 
-          {/* Skills */}
           {skills.length > 0 && (
-            <section className="mb-6">
-              <h2 className="mb-4 text-lg font-semibold text-foreground">专业技能</h2>
-              <div className="space-y-3">
+            <section className={previewStyle.section}>
+              <h2 className={cn('text-lg font-semibold text-foreground', previewStyle.sectionTitle)}>
+                专业技能
+              </h2>
+              <div className={previewStyle.card}>
                 {skills.map((skill) => (
                   <div key={skill.id}>
                     <h3 className="mb-2 text-sm font-medium text-foreground">{skill.category}</h3>
                     <div className="flex flex-wrap gap-2">
                       {skill.items.map((item, i) => (
-                        <Badge key={i} variant="outline" className="text-xs">
+                        <Badge
+                          key={i}
+                          variant="outline"
+                          className="border-[color:var(--resume-accent)]/20 bg-[color:var(--resume-accent)]/6 text-xs text-foreground"
+                        >
                           {item}
                         </Badge>
                       ))}
@@ -187,11 +239,12 @@ export function ResumePreview() {
             </section>
           )}
 
-          {/* Projects */}
           {projects.length > 0 && (
             <section>
-              <h2 className="mb-4 text-lg font-semibold text-foreground">项目经历</h2>
-              <div className="space-y-4">
+              <h2 className={cn('text-lg font-semibold text-foreground', previewStyle.sectionTitle)}>
+                项目经历
+              </h2>
+              <div className={previewStyle.list}>
                 {projects.map((project) => (
                   <div key={project.id}>
                     <div className="flex items-start justify-between">
@@ -203,7 +256,7 @@ export function ResumePreview() {
                               href={project.link}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="ml-2 text-sm font-normal text-primary hover:underline"
+                              className="ml-2 text-sm font-normal text-[var(--resume-accent)] hover:underline"
                             >
                               查看项目
                             </a>
@@ -217,7 +270,10 @@ export function ResumePreview() {
                     {project.technologies.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {project.technologies.map((tech, i) => (
-                          <Badge key={i} className="text-xs">
+                          <Badge
+                            key={i}
+                            className="border-transparent bg-[color:var(--resume-accent)] text-xs text-white"
+                          >
                             {tech}
                           </Badge>
                         ))}
@@ -227,7 +283,7 @@ export function ResumePreview() {
                       <ul className="mt-2 space-y-1">
                         {project.highlights.map((highlight, i) => (
                           <li key={i} className="flex text-sm text-foreground/80">
-                            <span className="mr-2 text-primary">•</span>
+                            <span className="mr-2 text-[var(--resume-accent)]">•</span>
                             {highlight}
                           </li>
                         ))}

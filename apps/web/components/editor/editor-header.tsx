@@ -1,18 +1,22 @@
 'use client'
 
+import Link from 'next/link'
 import { useResume } from '@/lib/resume-context'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { FileText, Download, Share2, Cloud, CloudOff, Loader2 } from 'lucide-react'
+import { FileText, Download, Eye, Cloud, CloudOff, Loader2, Undo2, Redo2 } from 'lucide-react'
 
-export function EditorHeader() {
+interface EditorHeaderProps {
+  resumeId: string
+}
+
+export function EditorHeader({ resumeId }: EditorHeaderProps) {
   const { state } = useResume()
-  const { saveStatus, lastSaved } = state
+  const { saveStatus, lastSaved, data } = state
 
   const formatLastSaved = () => {
     if (!lastSaved) return ''
@@ -53,71 +57,62 @@ export function EditorHeader() {
   }
 
   const handleDownload = () => {
-    // TODO: Implement PDF download
-    alert('PDF 下载功能即将上线')
-  }
-
-  const handleShare = () => {
-    // TODO: Implement share functionality
-    alert('分享功能即将上线')
+    window.print()
   }
 
   return (
-    <header className="flex h-14 items-center justify-between border-b bg-card px-4">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary">
+    <header className="flex h-16 items-center justify-between border-b bg-card px-5">
+      <div className="flex min-w-0 items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex size-9 items-center justify-center rounded-xl bg-primary">
             <FileText className="size-4 text-primary-foreground" />
           </div>
-          <div>
-            <h1 className="text-sm font-semibold text-foreground">简历编辑器</h1>
-            <p className="text-xs text-muted-foreground">在线制作专业简历</p>
+          <div className="text-sm font-semibold text-foreground">ResumeCraft</div>
+        </div>
+        <div className="hidden h-5 w-px bg-border sm:block" />
+        <div className="min-w-0">
+          <div className="truncate text-sm font-semibold text-foreground">
+            {data.personalInfo.name || '未命名简历'}
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            {getSaveStatusIcon()}
+            <span>{getSaveStatusText() || 'Auto-saved'}</span>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* Save Status */}
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon-sm" disabled>
+          <Undo2 className="size-4" />
+        </Button>
+        <Button variant="ghost" size="icon-sm" disabled>
+          <Redo2 className="size-4" />
+        </Button>
+        <div className="h-4 w-px bg-border" />
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              {getSaveStatusIcon()}
-              <span className="hidden sm:inline">{getSaveStatusText()}</span>
-            </div>
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/preview/${resumeId}`}>
+                <Eye className="size-4" />
+                <span className="hidden sm:inline">Preview</span>
+              </Link>
+            </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>自动保存到本地存储</p>
+            <p>进入全屏预览</p>
           </TooltipContent>
         </Tooltip>
-
-        <div className="h-4 w-px bg-border" />
-
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" onClick={handleDownload}>
-                <Download className="size-4" />
-                <span className="hidden sm:inline">下载 PDF</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>下载 PDF 格式简历</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button size="sm" onClick={handleShare}>
-                <Share2 className="size-4" />
-                <span className="hidden sm:inline">发布分享</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>生成在线分享链接</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button size="sm" onClick={handleDownload}>
+              <Download className="size-4" />
+              <span className="hidden sm:inline">Export PDF</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>导出 PDF</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </header>
   )

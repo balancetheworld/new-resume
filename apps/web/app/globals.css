@@ -100,11 +100,25 @@
 
 /* Print styles for PDF export */
 @media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
   .no-print {
     display: none !important;
   }
+
   .resume-preview {
     box-shadow: none !important;
     margin: 0 !important;
+    max-width: none !important;
+    border-radius: 0 !important;
+    padding: 12mm !important;
   }
 }

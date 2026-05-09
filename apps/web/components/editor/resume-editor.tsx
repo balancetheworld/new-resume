@@ -4,22 +4,31 @@ import { ResumeProvider } from '@/lib/resume-context'
 import { EditorHeader } from './editor-header'
 import { EditorSidebar } from './editor-sidebar'
 import { ResumePreview } from './resume-preview'
+import { EditorStylePanel } from './editor-style-panel'
 
-export function ResumeEditor() {
+interface ResumeEditorProps {
+  resumeId: string
+}
+
+export function ResumeEditor({ resumeId }: ResumeEditorProps) {
   return (
     <ResumeProvider>
       <div className="flex h-screen flex-col bg-background">
-        <EditorHeader />
+        <div className="no-print">
+          <EditorHeader resumeId={resumeId} />
+        </div>
         <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar - Form Editor */}
-          <aside className="w-full max-w-md shrink-0 overflow-hidden border-r lg:w-[420px]">
+          <aside className="no-print hidden shrink-0 overflow-hidden border-r lg:block lg:w-[320px] xl:w-[340px]">
             <EditorSidebar />
           </aside>
 
-          {/* Main - Resume Preview */}
-          <main className="flex-1 overflow-hidden">
+          <main className="min-w-0 flex-1 overflow-hidden">
             <ResumePreview />
           </main>
+
+          <aside className="no-print hidden shrink-0 overflow-hidden border-l xl:block xl:w-[260px]">
+            <EditorStylePanel />
+          </aside>
         </div>
       </div>
     </ResumeProvider>

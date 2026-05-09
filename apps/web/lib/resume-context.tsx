@@ -54,12 +54,20 @@ export interface Project {
   highlights: string[]
 }
 
+export interface ResumeStyle {
+  accentColor: string
+  fontFamily: 'inter' | 'noto-sans-sc' | 'georgia' | 'jetbrains-mono'
+  spacing: 'compact' | 'comfortable' | 'airy'
+  margin: 'narrow' | 'normal' | 'wide'
+}
+
 export interface ResumeData {
   personalInfo: PersonalInfo
   workExperience: WorkExperience[]
   education: Education[]
   skills: Skill[]
   projects: Project[]
+  style: ResumeStyle
 }
 
 export type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error'
@@ -85,6 +93,7 @@ type ResumeAction =
   | { type: 'UPDATE_PROJECT'; payload: { id: string; data: Partial<Project> } }
   | { type: 'ADD_PROJECT' }
   | { type: 'REMOVE_PROJECT'; payload: string }
+  | { type: 'UPDATE_STYLE'; payload: Partial<ResumeStyle> }
   | { type: 'SET_SAVE_STATUS'; payload: SaveStatus }
   | { type: 'SET_LAST_SAVED'; payload: Date }
   | { type: 'LOAD_DATA'; payload: ResumeData }
@@ -189,6 +198,31 @@ const defaultResumeData: ResumeData = {
       ],
     },
   ],
+  style: {
+    accentColor: '#378ADD',
+    fontFamily: 'inter',
+    spacing: 'comfortable',
+    margin: 'normal',
+  },
+}
+
+function normalizeResumeData(data: Partial<ResumeData>): ResumeData {
+  return {
+    ...defaultResumeData,
+    ...data,
+    personalInfo: {
+      ...defaultResumeData.personalInfo,
+      ...data.personalInfo,
+    },
+    workExperience: data.workExperience ?? defaultResumeData.workExperience,
+    education: data.education ?? defaultResumeData.education,
+    skills: data.skills ?? defaultResumeData.skills,
+    projects: data.projects ?? defaultResumeData.projects,
+    style: {
+      ...defaultResumeData.style,
+      ...data.style,
+    },
+  }
 }
 
 function resumeReducer(state: ResumeState, action: ResumeAction): ResumeState {
@@ -369,6 +403,18 @@ function resumeReducer(state: ResumeState, action: ResumeAction): ResumeState {
         },
         saveStatus: 'unsaved',
       }
+    case 'UPDATE_STYLE':
+      return {
+        ...state,
+        data: {
+          ...state.data,
+          style: {
+            ...state.data.style,
+            ...action.payload,
+          },
+        },
+        saveStatus: 'unsaved',
+      }
     case 'SET_SAVE_STATUS':
       return { ...state, saveStatus: action.payload }
     case 'SET_LAST_SAVED':
@@ -396,6 +442,7 @@ interface ResumeContextValue {
   updateProject: (id: string, data: Partial<Project>) => void
   addProject: () => void
   removeProject: (id: string) => void
+  updateStyle: (data: Partial<ResumeStyle>) => void
 }
 
 const ResumeContext = createContext<ResumeContextValue | null>(null)
@@ -417,7 +464,7 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) {
         const parsed = JSON.parse(saved)
-        dispatch({ type: 'LOAD_DATA', payload: parsed })
+        dispatch({ type: 'LOAD_DATA', payload: normalizeResumeData(parsed) })
       }
     } catch (e) {
       console.error('Failed to load saved resume data:', e)
@@ -504,6 +551,10 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'REMOVE_PROJECT', payload: id })
   }, [])
 
+  const updateStyle = useCallback((data: Partial<ResumeStyle>) => {
+    dispatch({ type: 'UPDATE_STYLE', payload: data })
+  }, [])
+
   return (
     <ResumeContext.Provider
       value={{
@@ -522,6 +573,7 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
         updateProject,
         addProject,
         removeProject,
+        updateStyle,
       }}
     >
       {children}
