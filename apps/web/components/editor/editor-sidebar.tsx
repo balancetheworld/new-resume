@@ -25,9 +25,8 @@ export function EditorSidebar() {
     <div className="flex h-full flex-col bg-editor-sidebar">
       <Tabs defaultValue="content" className="flex h-full flex-col">
         <div className="border-b px-5 py-4">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="content">{dictionary.editor.content}</TabsTrigger>
-            <TabsTrigger value="sections">{dictionary.editor.sections}</TabsTrigger>
             <TabsTrigger value="reorder">{dictionary.editor.reorder}</TabsTrigger>
           </TabsList>
         </div>
@@ -82,23 +81,6 @@ export function EditorSidebar() {
                     {dictionary.editor.sidebarEmpty}
                   </div>
                 )}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="sections" className="mt-0">
-              <div className="space-y-3">
-                {[
-                  dictionary.editor.basicInfo,
-                  dictionary.editor.practice,
-                  dictionary.editor.projects,
-                  dictionary.editor.portfolio,
-                  dictionary.editor.abilities,
-                ].map((item) => (
-                  <div key={item} className="rounded-xl border bg-card px-4 py-3">
-                    <div className="text-sm font-medium text-foreground">{item}</div>
-                    <div className="mt-1 text-xs text-muted-foreground">{dictionary.common.enabled}</div>
-                  </div>
-                ))}
               </div>
             </TabsContent>
 

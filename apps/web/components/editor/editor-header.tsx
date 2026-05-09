@@ -9,14 +9,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { FileText, Download, Eye, Undo2, Redo2 } from 'lucide-react'
+import { FileText, Download, Eye, Menu } from 'lucide-react'
 
 interface EditorHeaderProps {
   resumeId: string
   mode: 'home' | 'editor'
+  onMobileMenuClick?: () => void
 }
 
-export function EditorHeader({ resumeId, mode }: EditorHeaderProps) {
+export function EditorHeader({ resumeId, mode, onMobileMenuClick }: EditorHeaderProps) {
   const { state } = useResume()
   const { data } = state
   const { dictionary } = useI18n()
@@ -28,6 +29,18 @@ export function EditorHeader({ resumeId, mode }: EditorHeaderProps) {
   return (
     <header className="flex h-14 items-center justify-between border-b bg-card px-6">
       <div className="flex min-w-0 items-center gap-4">
+        {/* 移动端菜单按钮 */}
+        {onMobileMenuClick && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="lg:hidden size-8"
+            onClick={onMobileMenuClick}
+          >
+            <Menu className="size-5" />
+          </Button>
+        )}
         <div className="flex items-center gap-3">
           <div className="flex size-6 items-center justify-center rounded-md bg-primary">
             <FileText className="size-3.5 text-primary-foreground" />
@@ -46,15 +59,6 @@ export function EditorHeader({ resumeId, mode }: EditorHeaderProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" disabled className="h-7 px-2 text-[11px] shadow-none">
-          <Undo2 className="size-4" />
-          <span>{dictionary.common.undo}</span>
-        </Button>
-        <Button variant="outline" size="sm" disabled className="h-7 px-2 text-[11px] shadow-none">
-          <Redo2 className="size-4" />
-          <span>{dictionary.common.redo}</span>
-        </Button>
-        <div className="h-4 w-px bg-border" />
         {mode === 'editor' && (
           <Tooltip>
             <TooltipTrigger asChild>

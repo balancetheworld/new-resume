@@ -16,18 +16,6 @@ const fontOptions = [
   { label: 'Georgia', value: 'georgia' as const },
 ]
 
-const densityOptions = [
-  { label: 'Tight', value: 'tight' as const },
-  { label: 'Fit', value: 'fit' as const },
-  { label: 'Airy', value: 'airy' as const },
-]
-
-const marginOptions = [
-  { label: 'Slim', value: 'slim' as const },
-  { label: 'Normal', value: 'normal' as const },
-  { label: 'Wide', value: 'wide' as const },
-]
-
 export function EditorStylePanel() {
   const { state, updateStyle, updateTemplate } = useResume()
   const { style } = state.data
@@ -80,13 +68,26 @@ export function EditorStylePanel() {
 
         <div className="space-y-3">
           <div className="text-sm font-medium text-foreground">{dictionary.editor.palette}</div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <input
+                type="color"
+                value={style.accentColor}
+                onChange={(e) => updateStyle({ accentColor: e.target.value })}
+                className="size-10 cursor-pointer rounded-full border-2 border-slate-200 overflow-hidden"
+                style={{ backgroundColor: style.accentColor }}
+              />
+            </div>
+            <div className="text-xs text-muted-foreground font-mono">{style.accentColor}</div>
+          </div>
+          {/* 预设快捷颜色 */}
+          <div className="flex flex-wrap gap-2 mt-2">
             {accentColors.map((color) => (
               <button
                 key={color}
                 type="button"
                 onClick={() => updateStyle({ accentColor: color })}
-                className="size-8 rounded-full border-2"
+                className="size-6 rounded-full border-2 transition-transform hover:scale-110"
                 style={{
                   backgroundColor: color,
                   borderColor: style.accentColor === color ? '#0f172a' : 'transparent',
@@ -107,46 +108,6 @@ export function EditorStylePanel() {
                 onClick={() => updateStyle({ fontFamily: option.value })}
                 className={`rounded-xl border px-3 py-2 text-left text-sm ${
                   style.fontFamily === option.value
-                    ? 'border-primary bg-primary/8 text-primary'
-                    : 'bg-background text-foreground'
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <div className="text-sm font-medium text-foreground">{dictionary.editor.density}</div>
-          <div className="grid grid-cols-3 gap-2">
-            {densityOptions.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => updateStyle({ density: option.value })}
-                className={`rounded-xl border px-3 py-2 text-sm ${
-                  style.density === option.value
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'bg-background text-foreground'
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <div className="text-sm font-medium text-foreground">{dictionary.editor.margins}</div>
-          <div className="grid grid-cols-3 gap-2">
-            {marginOptions.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => updateStyle({ margin: option.value })}
-                className={`rounded-xl border px-3 py-2 text-sm ${
-                  style.margin === option.value
                     ? 'border-primary bg-primary/8 text-primary'
                     : 'bg-background text-foreground'
                 }`}
