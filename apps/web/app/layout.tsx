@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+import { getI18n } from '@/lib/i18n/server'
+import { I18nProvider } from '@/lib/i18n/context'
 import './globals.css'
 
 const inter = Inter({
@@ -8,13 +10,13 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: '简历编辑器 - 在线制作专业简历',
-  description: '免费在线简历编辑器，支持实时预览、自动保存、一键发布分享。轻松制作专业简历，助力职场发展。',
-  keywords: ['简历', '简历编辑器', '在线简历', 'resume', 'CV', '求职'],
-  authors: [{ name: 'Resume Editor Team' }],
+  title: 'Folio. - 在线简历编辑器',
+  description: 'Folio. 是一个所见即所得的在线简历编辑器，支持模板选择、实时预览和自定义布局。',
+  keywords: ['Folio', '简历编辑器', '在线简历', 'resume', 'CV'],
+  authors: [{ name: 'Folio Team' }],
   openGraph: {
-    title: '简历编辑器 - 在线制作专业简历',
-    description: '免费在线简历编辑器，支持实时预览、自动保存、一键发布分享',
+    title: 'Folio. - 在线简历编辑器',
+    description: '所见即所得的在线简历编辑器',
     type: 'website',
   },
 }
@@ -23,19 +25,24 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f8fafc' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
   ],
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { locale, dictionary } = await getI18n()
+
   return (
-    <html lang="zh-CN" className={`${inter.variable} bg-background`}>
-      <body className="font-sans antialiased">{children}</body>
+    <html lang={locale} className={`${inter.variable} bg-background`}>
+      <body className="font-sans antialiased">
+        <I18nProvider locale={locale} dictionary={dictionary}>
+          {children}
+        </I18nProvider>
+      </body>
     </html>
   )
 }

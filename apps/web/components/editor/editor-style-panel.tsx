@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { useResume } from '@/lib/resume-context'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { useTemplateStore } from '@/lib/template-store'
+import { getResumeTemplate } from '@/lib/resume-templates'
+import { useI18n } from '@/lib/i18n/context'
 
 const accentColors = ['#378ADD', '#185FA5', '#0F766E', '#D97706', '#9333EA', '#DC2626']
 
@@ -11,35 +14,45 @@ const fontOptions = [
   { label: 'Inter', value: 'inter' as const },
   { label: 'Noto Sans SC', value: 'noto-sans-sc' as const },
   { label: 'Georgia', value: 'georgia' as const },
-  { label: 'JetBrains Mono', value: 'jetbrains-mono' as const },
 ]
 
-const spacingOptions = [
-  { label: 'Compact', value: 'compact' as const },
-  { label: 'Comfortable', value: 'comfortable' as const },
+const densityOptions = [
+  { label: 'Tight', value: 'tight' as const },
+  { label: 'Fit', value: 'fit' as const },
   { label: 'Airy', value: 'airy' as const },
 ]
 
 const marginOptions = [
-  { label: 'Narrow', value: 'narrow' as const },
+  { label: 'Slim', value: 'slim' as const },
   { label: 'Normal', value: 'normal' as const },
   { label: 'Wide', value: 'wide' as const },
 ]
 
 export function EditorStylePanel() {
-  const { state, updateStyle } = useResume()
+  const { state, updateStyle, updateTemplate } = useResume()
   const { style } = state.data
+  const selectedTemplateId = useTemplateStore((store) => store.selectedTemplateId)
+  const currentTemplate = getResumeTemplate(selectedTemplateId || state.data.templateId)
+  const { dictionary } = useI18n()
+
+  const handleApplyCurrentTemplate = () => {
+    updateTemplate({
+      templateId: currentTemplate.id,
+      templateName: currentTemplate.name,
+      style: currentTemplate.style,
+    })
+  }
 
   return (
     <div className="flex h-full flex-col bg-card">
       <div className="border-b px-5 py-4">
-        <div className="text-sm font-semibold text-foreground">Style</div>
-        <div className="mt-1 text-xs text-muted-foreground">调整模板、颜色和排版密度</div>
+        <div className="text-sm font-semibold text-foreground">{dictionary.editor.style}</div>
+        <div className="mt-1 text-xs text-muted-foreground">{dictionary.editor.styleDescription}</div>
       </div>
 
       <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5">
         <div className="space-y-3">
-          <div className="text-sm font-medium text-foreground">Template</div>
+          <div className="text-sm font-medium text-foreground">{dictionary.editor.template}</div>
           <div className="rounded-2xl border bg-background p-4">
             <div className="h-24 rounded-xl border bg-white p-3 shadow-sm">
               <div className="h-2.5 w-16 rounded-full bg-slate-900" />
@@ -52,18 +65,21 @@ export function EditorStylePanel() {
             </div>
             <div className="mt-3 flex items-center justify-between">
               <div>
-                <div className="text-sm font-medium text-foreground">Modern Blue</div>
-                <div className="text-xs text-muted-foreground">当前模板</div>
+                <div className="text-sm font-medium text-foreground">{currentTemplate.name}</div>
+                <div className="text-xs text-muted-foreground">{dictionary.editor.currentTemplate}</div>
               </div>
               <Button variant="outline" size="sm" asChild>
-                <Link href="/templates">Change</Link>
+                <Link href="/templates">{dictionary.common.change}</Link>
               </Button>
             </div>
+            <Button variant="secondary" size="sm" className="mt-3 w-full" onClick={handleApplyCurrentTemplate}>
+              {dictionary.editor.applyCurrentTemplate}
+            </Button>
           </div>
         </div>
 
         <div className="space-y-3">
-          <div className="text-sm font-medium text-foreground">Accent color</div>
+          <div className="text-sm font-medium text-foreground">{dictionary.editor.palette}</div>
           <div className="flex flex-wrap gap-3">
             {accentColors.map((color) => (
               <button
@@ -82,7 +98,7 @@ export function EditorStylePanel() {
         </div>
 
         <div className="space-y-3">
-          <div className="text-sm font-medium text-foreground">Font</div>
+          <div className="text-sm font-medium text-foreground">{dictionary.editor.font}</div>
           <div className="grid gap-2">
             {fontOptions.map((option) => (
               <button
@@ -102,15 +118,15 @@ export function EditorStylePanel() {
         </div>
 
         <div className="space-y-3">
-          <div className="text-sm font-medium text-foreground">Spacing</div>
+          <div className="text-sm font-medium text-foreground">{dictionary.editor.density}</div>
           <div className="grid grid-cols-3 gap-2">
-            {spacingOptions.map((option) => (
+            {densityOptions.map((option) => (
               <button
                 key={option.value}
                 type="button"
-                onClick={() => updateStyle({ spacing: option.value })}
+                onClick={() => updateStyle({ density: option.value })}
                 className={`rounded-xl border px-3 py-2 text-sm ${
-                  style.spacing === option.value
+                  style.density === option.value
                     ? 'border-primary bg-primary text-primary-foreground'
                     : 'bg-background text-foreground'
                 }`}
@@ -122,7 +138,7 @@ export function EditorStylePanel() {
         </div>
 
         <div className="space-y-3">
-          <div className="text-sm font-medium text-foreground">Page margins</div>
+          <div className="text-sm font-medium text-foreground">{dictionary.editor.margins}</div>
           <div className="grid grid-cols-3 gap-2">
             {marginOptions.map((option) => (
               <button
@@ -141,10 +157,44 @@ export function EditorStylePanel() {
           </div>
         </div>
 
-        <div className="rounded-2xl border bg-background p-4">
-          <Badge variant="secondary">Pro tip</Badge>
-          <div className="mt-3 text-sm text-foreground">
-            先确定模板和主色，再集中调整内容，能更快接近最终投递效果。
+        <div className="space-y-3">
+          <div className="text-sm font-medium text-foreground">{dictionary.editor.highlight}</div>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { label: dictionary.editor.highlightNone, value: 'none' as const },
+              { label: dictionary.editor.highlightSections, value: 'sections' as const },
+              { label: dictionary.editor.highlightHeader, value: 'header' as const },
+            ].map((option) => {
+              const selected = style.highlight.includes(option.value)
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() =>
+                    updateStyle({
+                      highlight: selected
+                        ? style.highlight.filter((item) => item !== option.value)
+                        : [...style.highlight.filter((item) => item !== 'none'), option.value],
+                    })
+                  }
+                  className={`rounded-md border px-3 py-1.5 text-[11px] font-medium ${
+                    selected ? 'border-primary bg-primary/10 text-primary' : 'bg-background text-foreground'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="rounded-xl border-l-2 border-primary bg-[var(--folio-primary-light)] px-4 py-3">
+          <Badge variant="secondary" className="folio-status-editing">
+            {dictionary.editor.keepWriting}
+          </Badge>
+          <div className="mt-3 text-sm text-[var(--folio-primary-dark)]">
+            {dictionary.editor.autoSavedHint}
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Plus, Trash2, GripVertical } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface WorkExperienceFormProps {
   experiences: WorkExperience[]
@@ -15,6 +16,7 @@ interface WorkExperienceFormProps {
 
 export function WorkExperienceForm({ experiences }: WorkExperienceFormProps) {
   const { updateWorkExperience, addWorkExperience, removeWorkExperience } = useResume()
+  const { dictionary } = useI18n()
 
   const handleHighlightsChange = (id: string, value: string) => {
     const highlights = value.split('\n').filter((line) => line.trim() !== '')
@@ -35,7 +37,7 @@ export function WorkExperienceForm({ experiences }: WorkExperienceFormProps) {
                 <GripVertical className="size-4 text-muted-foreground" />
                 <div className="text-left">
                   <div className="font-medium">
-                    {exp.position || exp.company || `工作经历 ${index + 1}`}
+                    {exp.position || exp.company || `${dictionary.form.accordion.workExperience} ${index + 1}`}
                   </div>
                   {exp.company && exp.position && (
                     <div className="text-sm text-muted-foreground">{exp.company}</div>
@@ -46,35 +48,35 @@ export function WorkExperienceForm({ experiences }: WorkExperienceFormProps) {
             <AccordionContent className="space-y-4 pt-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>公司名称</Label>
+                  <Label>{dictionary.form.company}</Label>
                   <Input
                     value={exp.company}
                     onChange={(e) => updateWorkExperience(exp.id, { company: e.target.value })}
-                    placeholder="公司名称"
+                    placeholder={dictionary.form.placeholders.company}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>职位</Label>
+                  <Label>{dictionary.form.position}</Label>
                   <Input
                     value={exp.position}
                     onChange={(e) => updateWorkExperience(exp.id, { position: e.target.value })}
-                    placeholder="职位名称"
+                    placeholder={dictionary.form.placeholders.position}
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>工作地点</Label>
+                <Label>{dictionary.form.location}</Label>
                 <Input
                   value={exp.location}
                   onChange={(e) => updateWorkExperience(exp.id, { location: e.target.value })}
-                  placeholder="城市"
+                  placeholder={dictionary.form.placeholders.location}
                 />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>开始时间</Label>
+                  <Label>{dictionary.form.startDate}</Label>
                   <Input
                     type="month"
                     value={exp.startDate}
@@ -82,7 +84,7 @@ export function WorkExperienceForm({ experiences }: WorkExperienceFormProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>结束时间</Label>
+                  <Label>{dictionary.form.endDate}</Label>
                   <Input
                     type="month"
                     value={exp.endDate}
@@ -99,25 +101,25 @@ export function WorkExperienceForm({ experiences }: WorkExperienceFormProps) {
                     updateWorkExperience(exp.id, { current: checked, endDate: checked ? '' : exp.endDate })
                   }
                 />
-                <Label>至今在职</Label>
+                <Label>{dictionary.form.currentJob}</Label>
               </div>
 
               <div className="space-y-2">
-                <Label>工作描述</Label>
+                <Label>{dictionary.form.workDescription}</Label>
                 <Textarea
                   value={exp.description}
                   onChange={(e) => updateWorkExperience(exp.id, { description: e.target.value })}
-                  placeholder="简要描述你的工作职责..."
+                  placeholder={dictionary.form.placeholders.workDescription}
                   className="min-h-20 resize-none"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>工作亮点（每行一条）</Label>
+                <Label>{dictionary.form.workHighlights}</Label>
                 <Textarea
                   value={exp.highlights.join('\n')}
                   onChange={(e) => handleHighlightsChange(exp.id, e.target.value)}
-                  placeholder="- 主导完成了xxx项目&#10;- 提升了xxx指标&#10;- 获得xxx奖项"
+                  placeholder={dictionary.form.placeholders.workHighlights}
                   className="min-h-24 resize-none"
                 />
               </div>
@@ -129,7 +131,7 @@ export function WorkExperienceForm({ experiences }: WorkExperienceFormProps) {
                 className="w-full"
               >
                 <Trash2 className="mr-2 size-4" />
-                删除此经历
+                {dictionary.form.deleteExperience}
               </Button>
             </AccordionContent>
           </AccordionItem>
@@ -138,7 +140,7 @@ export function WorkExperienceForm({ experiences }: WorkExperienceFormProps) {
 
       <Button variant="outline" className="w-full" onClick={addWorkExperience}>
         <Plus className="mr-2 size-4" />
-        添加工作经历
+        {dictionary.editor.addExperience}
       </Button>
     </div>
   )

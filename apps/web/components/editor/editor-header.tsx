@@ -3,114 +3,86 @@
 import Link from 'next/link'
 import { useResume } from '@/lib/resume-context'
 import { Button } from '@/components/ui/button'
+import { useI18n } from '@/lib/i18n/context'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { FileText, Download, Eye, Cloud, CloudOff, Loader2, Undo2, Redo2 } from 'lucide-react'
+import { FileText, Download, Eye, Undo2, Redo2 } from 'lucide-react'
 
 interface EditorHeaderProps {
   resumeId: string
+  mode: 'home' | 'editor'
 }
 
-export function EditorHeader({ resumeId }: EditorHeaderProps) {
+export function EditorHeader({ resumeId, mode }: EditorHeaderProps) {
   const { state } = useResume()
-  const { saveStatus, lastSaved, data } = state
-
-  const formatLastSaved = () => {
-    if (!lastSaved) return ''
-    const now = new Date()
-    const diff = now.getTime() - lastSaved.getTime()
-    const seconds = Math.floor(diff / 1000)
-    const minutes = Math.floor(seconds / 60)
-
-    if (seconds < 60) return '刚刚保存'
-    if (minutes < 60) return `${minutes} 分钟前保存`
-    return lastSaved.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-  }
-
-  const getSaveStatusIcon = () => {
-    switch (saveStatus) {
-      case 'saving':
-        return <Loader2 className="size-4 animate-spin" />
-      case 'saved':
-        return <Cloud className="size-4" />
-      case 'error':
-        return <CloudOff className="size-4 text-destructive" />
-      default:
-        return <Cloud className="size-4 text-muted-foreground" />
-    }
-  }
-
-  const getSaveStatusText = () => {
-    switch (saveStatus) {
-      case 'saving':
-        return '正在保存...'
-      case 'saved':
-        return formatLastSaved() || '已保存'
-      case 'error':
-        return '保存失败'
-      default:
-        return '未保存'
-    }
-  }
+  const { data } = state
+  const { dictionary } = useI18n()
 
   const handleDownload = () => {
     window.print()
   }
 
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-card px-5">
+    <header className="flex h-14 items-center justify-between border-b bg-card px-6">
       <div className="flex min-w-0 items-center gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-primary">
-            <FileText className="size-4 text-primary-foreground" />
+          <div className="flex size-6 items-center justify-center rounded-md bg-primary">
+            <FileText className="size-3.5 text-primary-foreground" />
           </div>
-          <div className="text-sm font-semibold text-foreground">ResumeCraft</div>
+          <div className="text-[14px] font-medium text-foreground">Folio.</div>
         </div>
-        <div className="hidden h-5 w-px bg-border sm:block" />
+        <div className="hidden text-[11px] text-[rgba(58,58,74,0.18)] sm:block">/</div>
         <div className="min-w-0">
-          <div className="truncate text-sm font-semibold text-foreground">
-            {data.personalInfo.name || '未命名简历'}
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            {getSaveStatusIcon()}
-            <span>{getSaveStatusText() || 'Auto-saved'}</span>
+          <div className="truncate text-[13px] font-medium text-[rgba(58,58,74,0.45)]">
+            {data.resumeName}
           </div>
         </div>
+        <span className="rounded-md bg-[var(--folio-primary-light)] px-2 py-0.5 text-[10px] font-medium text-[var(--folio-primary-dark)]">
+          {dictionary.common.autoSaved}
+        </span>
       </div>
 
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon-sm" disabled>
+        <Button variant="outline" size="sm" disabled className="h-7 px-2 text-[11px] shadow-none">
           <Undo2 className="size-4" />
+          <span>{dictionary.common.undo}</span>
         </Button>
-        <Button variant="ghost" size="icon-sm" disabled>
+        <Button variant="outline" size="sm" disabled className="h-7 px-2 text-[11px] shadow-none">
           <Redo2 className="size-4" />
+          <span>{dictionary.common.redo}</span>
         </Button>
         <div className="h-4 w-px bg-border" />
+        {mode === 'editor' && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" asChild className="h-7 px-2 text-[11px] shadow-none">
+                <Link href={`/preview/${resumeId}`}>
+                  <Eye className="size-4" />
+                  <span className="hidden sm:inline">{dictionary.common.preview}</span>
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{dictionary.editor.previewFullScreen}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`/preview/${resumeId}`}>
-                <Eye className="size-4" />
-                <span className="hidden sm:inline">Preview</span>
-              </Link>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>进入全屏预览</p>
-          </TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button size="sm" onClick={handleDownload}>
+            <Button
+              size="sm"
+              onClick={handleDownload}
+              className="h-7 bg-[var(--folio-purple)] px-3 text-[11px] text-white hover:bg-[var(--folio-purple)]"
+            >
               <Download className="size-4" />
-              <span className="hidden sm:inline">Export PDF</span>
+              <span className="hidden sm:inline">{dictionary.common.exportPdf}</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>导出 PDF</p>
+            <p>{dictionary.common.exportPdf}</p>
           </TooltipContent>
         </Tooltip>
       </div>

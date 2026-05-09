@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Plus, Trash2, GripVertical, X } from 'lucide-react'
 import { useState } from 'react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface ProjectsFormProps {
   projects: Project[]
@@ -17,6 +18,7 @@ interface ProjectsFormProps {
 export function ProjectsForm({ projects }: ProjectsFormProps) {
   const { updateProject, addProject, removeProject } = useResume()
   const [newTechInputs, setNewTechInputs] = useState<Record<string, string>>({})
+  const { dictionary } = useI18n()
 
   const handleHighlightsChange = (id: string, value: string) => {
     const highlights = value.split('\n').filter((line) => line.trim() !== '')
@@ -64,7 +66,7 @@ export function ProjectsForm({ projects }: ProjectsFormProps) {
                 <GripVertical className="size-4 text-muted-foreground" />
                 <div className="text-left">
                   <div className="font-medium">
-                    {project.name || `项目 ${index + 1}`}
+                    {project.name || `${dictionary.form.accordion.project} ${index + 1}`}
                   </div>
                   {project.technologies.length > 0 && (
                     <div className="text-sm text-muted-foreground">
@@ -77,35 +79,35 @@ export function ProjectsForm({ projects }: ProjectsFormProps) {
             </AccordionTrigger>
             <AccordionContent className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label>项目名称</Label>
+                <Label>{dictionary.form.projectName}</Label>
                 <Input
                   value={project.name}
                   onChange={(e) => updateProject(project.id, { name: e.target.value })}
-                  placeholder="项目名称"
+                  placeholder={dictionary.form.placeholders.projectName}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>项目描述</Label>
+                <Label>{dictionary.form.projectDescription}</Label>
                 <Textarea
                   value={project.description}
                   onChange={(e) => updateProject(project.id, { description: e.target.value })}
-                  placeholder="简要描述项目内容和你的角色..."
+                  placeholder={dictionary.form.placeholders.projectDescription}
                   className="min-h-20 resize-none"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>项目链接（可选）</Label>
+                <Label>{dictionary.form.projectLinkOptional}</Label>
                 <Input
                   value={project.link || ''}
                   onChange={(e) => updateProject(project.id, { link: e.target.value })}
-                  placeholder="https://github.com/..."
+                  placeholder={dictionary.form.placeholders.projectLink}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>技术栈</Label>
+                <Label>{dictionary.form.technologies}</Label>
                 <div className="flex flex-wrap gap-2">
                   {project.technologies.map((tech, techIndex) => (
                     <Badge key={techIndex} variant="secondary" className="gap-1 pr-1">
@@ -116,7 +118,9 @@ export function ProjectsForm({ projects }: ProjectsFormProps) {
                         className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20"
                       >
                         <X className="size-3" />
-                        <span className="sr-only">删除 {tech}</span>
+                        <span className="sr-only">
+                          {dictionary.form.removeItem} {tech}
+                        </span>
                       </button>
                     </Badge>
                   ))}
@@ -128,7 +132,7 @@ export function ProjectsForm({ projects }: ProjectsFormProps) {
                       setNewTechInputs((prev) => ({ ...prev, [project.id]: e.target.value }))
                     }
                     onKeyDown={(e) => handleKeyDown(e, project.id)}
-                    placeholder="输入技术名称，按回车添加"
+                    placeholder={dictionary.form.placeholders.addTechnology}
                   />
                   <Button
                     type="button"
@@ -136,17 +140,17 @@ export function ProjectsForm({ projects }: ProjectsFormProps) {
                     size="sm"
                     onClick={() => handleAddTech(project.id)}
                   >
-                    添加
+                    {dictionary.form.addTechnology}
                   </Button>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>项目亮点（每行一条）</Label>
+                <Label>{dictionary.form.projectHighlights}</Label>
                 <Textarea
                   value={project.highlights.join('\n')}
                   onChange={(e) => handleHighlightsChange(project.id, e.target.value)}
-                  placeholder="- 实现了xxx功能&#10;- 提升了xxx效率"
+                  placeholder={dictionary.form.placeholders.projectHighlights}
                   className="min-h-20 resize-none"
                 />
               </div>
@@ -158,7 +162,7 @@ export function ProjectsForm({ projects }: ProjectsFormProps) {
                 className="w-full"
               >
                 <Trash2 className="mr-2 size-4" />
-                删除此项目
+                {dictionary.form.deleteProject}
               </Button>
             </AccordionContent>
           </AccordionItem>
@@ -167,7 +171,7 @@ export function ProjectsForm({ projects }: ProjectsFormProps) {
 
       <Button variant="outline" className="w-full" onClick={addProject}>
         <Plus className="mr-2 size-4" />
-        添加项目经历
+        {dictionary.editor.addProject}
       </Button>
     </div>
   )

@@ -2,107 +2,128 @@
 
 import { useResume } from '@/lib/resume-context'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { useI18n } from '@/lib/i18n/context'
 
 export function PersonalInfoForm() {
   const { state, updatePersonalInfo } = useResume()
   const { personalInfo } = state.data
+  const { dictionary } = useI18n()
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
+    <div className="space-y-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="name">姓名</Label>
+          <Label htmlFor="name">{dictionary.form.name}</Label>
           <Input
             id="name"
             value={personalInfo.name}
             onChange={(e) => updatePersonalInfo({ name: e.target.value })}
-            placeholder="请输入姓名"
+            placeholder={dictionary.form.placeholders.name}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="title">职位</Label>
+          <Label htmlFor="jobTitle">{dictionary.form.jobTitle}</Label>
           <Input
-            id="title"
-            value={personalInfo.title}
-            onChange={(e) => updatePersonalInfo({ title: e.target.value })}
-            placeholder="请输入职位"
+            id="jobTitle"
+            value={personalInfo.jobTitle}
+            onChange={(e) => updatePersonalInfo({ jobTitle: e.target.value })}
+            placeholder={dictionary.form.placeholders.jobTitle}
           />
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="email">邮箱</Label>
+          <Label htmlFor="gender">{dictionary.form.gender}</Label>
           <Input
-            id="email"
-            type="email"
-            value={personalInfo.email}
-            onChange={(e) => updatePersonalInfo({ email: e.target.value })}
-            placeholder="your@email.com"
+            id="gender"
+            value={personalInfo.gender}
+            onChange={(e) => updatePersonalInfo({ gender: e.target.value })}
+            placeholder={dictionary.form.placeholders.gender}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">电话</Label>
+          <Label htmlFor="educationLevel">{dictionary.form.educationLevel}</Label>
+          <Input
+            id="educationLevel"
+            value={personalInfo.educationLevel}
+            onChange={(e) => updatePersonalInfo({ educationLevel: e.target.value })}
+            placeholder={dictionary.form.placeholders.educationLevel}
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="school">{dictionary.form.school}</Label>
+          <Input
+            id="school"
+            value={personalInfo.school}
+            onChange={(e) => updatePersonalInfo({ school: e.target.value })}
+            placeholder={dictionary.form.placeholders.school}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="major">{dictionary.form.major}</Label>
+          <Input
+            id="major"
+            value={personalInfo.major}
+            onChange={(e) => updatePersonalInfo({ major: e.target.value })}
+            placeholder={dictionary.form.placeholders.major}
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="qq">{dictionary.form.qq}</Label>
+          <Input
+            id="qq"
+            value={personalInfo.qq}
+            onChange={(e) => updatePersonalInfo({ qq: e.target.value })}
+            placeholder={dictionary.form.placeholders.qq}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="wechat">{dictionary.form.wechat}</Label>
+          <Input
+            id="wechat"
+            value={personalInfo.wechat}
+            onChange={(e) => updatePersonalInfo({ wechat: e.target.value })}
+            placeholder={dictionary.form.placeholders.wechat}
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="phone">{dictionary.form.phone}</Label>
           <Input
             id="phone"
             value={personalInfo.phone}
             onChange={(e) => updatePersonalInfo({ phone: e.target.value })}
-            placeholder="+86 138 0000 0000"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="location">所在地</Label>
-        <Input
-          id="location"
-          value={personalInfo.location}
-          onChange={(e) => updatePersonalInfo({ location: e.target.value })}
-          placeholder="城市, 区域"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="website">个人网站</Label>
-        <Input
-          id="website"
-          value={personalInfo.website || ''}
-          onChange={(e) => updatePersonalInfo({ website: e.target.value })}
-          placeholder="https://yourwebsite.com"
-        />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="linkedin">LinkedIn</Label>
-          <Input
-            id="linkedin"
-            value={personalInfo.linkedin || ''}
-            onChange={(e) => updatePersonalInfo({ linkedin: e.target.value })}
-            placeholder="linkedin.com/in/username"
+            placeholder={dictionary.form.placeholders.phone}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="github">GitHub</Label>
+          <Label htmlFor="github">{dictionary.form.github}</Label>
           <Input
             id="github"
-            value={personalInfo.github || ''}
+            value={personalInfo.github}
             onChange={(e) => updatePersonalInfo({ github: e.target.value })}
-            placeholder="github.com/username"
+            placeholder={dictionary.form.placeholders.github}
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="summary">个人简介</Label>
-        <Textarea
-          id="summary"
-          value={personalInfo.summary}
-          onChange={(e) => updatePersonalInfo({ summary: e.target.value })}
-          placeholder="简要介绍你的职业背景和专业特长..."
-          className="min-h-24 resize-none"
+        <Label htmlFor="portfolio">{dictionary.form.portfolio}</Label>
+        <Input
+          id="portfolio"
+          value={personalInfo.portfolio}
+          onChange={(e) => updatePersonalInfo({ portfolio: e.target.value })}
+          placeholder={dictionary.form.placeholders.portfolio}
         />
       </div>
     </div>

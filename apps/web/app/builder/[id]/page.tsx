@@ -1,33 +1,36 @@
+'use client'
+
 import Link from 'next/link'
 import { SiteHeader } from '@/components/site/site-header'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { useI18n } from '@/lib/i18n/context'
 
-const blocks = [
-  'Header block',
-  'Text block',
-  'Experience',
-  'Education',
-  'Skills bar',
-  'Divider',
-  'Image & avatar',
-  'Timeline',
-]
-
-export default async function BuilderDetailPage({
+export default function BuilderDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: { id: string }
 }) {
-  const { id } = await params
+  const { dictionary } = useI18n()
+  const blocks = [
+    dictionary.builder.blocks.header,
+    dictionary.builder.blocks.text,
+    dictionary.builder.blocks.experience,
+    dictionary.builder.blocks.education,
+    dictionary.builder.blocks.skills,
+    dictionary.builder.blocks.divider,
+    dictionary.builder.blocks.image,
+    dictionary.builder.blocks.timeline,
+  ]
+  const { id } = params
 
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader current="builder" />
       <main className="grid min-h-[calc(100vh-4rem)] grid-cols-1 xl:grid-cols-[220px_1fr_260px]">
         <aside className="border-r bg-card px-4 py-5">
-          <div className="text-sm font-semibold text-foreground">Components</div>
+          <div className="text-sm font-semibold text-foreground">{dictionary.builder.components}</div>
           <div className="mt-4 space-y-2">
             {blocks.map((block) => (
               <Card key={block} className="rounded-2xl px-4 py-3 text-sm shadow-none">
@@ -42,27 +45,29 @@ export default async function BuilderDetailPage({
             <div className="rounded-2xl border-2 border-primary p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xl font-semibold text-foreground">Header block</div>
-                  <div className="text-sm text-muted-foreground">选中状态</div>
+                  <div className="text-xl font-semibold text-foreground">{dictionary.builder.blocks.header}</div>
+                  <div className="text-sm text-muted-foreground">{dictionary.builder.selectedState}</div>
                 </div>
-                <Badge>Active</Badge>
+                <Badge>{dictionary.common.active}</Badge>
               </div>
             </div>
             <div className="mt-4 rounded-2xl border border-dashed p-4 text-sm text-muted-foreground">
-              + Drop component here
+              {dictionary.builder.dropHere}
             </div>
           </div>
         </section>
         <aside className="border-l bg-card px-5 py-5">
-          <div className="text-sm font-semibold text-foreground">Selected: Header block</div>
+          <div className="text-sm font-semibold text-foreground">
+            {dictionary.builder.selected}: {dictionary.builder.blocks.header}
+          </div>
           <div className="mt-4 space-y-3 text-sm text-muted-foreground">
-            <div>当前正在编辑布局 {id}</div>
-            <div>下一步可继续接入拖拽、属性编辑和层级排序。</div>
+            <div>{dictionary.builder.editingLayout} {id}</div>
+            <div>{dictionary.builder.nextStep}</div>
           </div>
           <div className="mt-6 flex gap-3">
-            <Button>Save as template</Button>
+            <Button>{dictionary.common.saveAsTemplate}</Button>
             <Button variant="outline" asChild>
-              <Link href={`/editor/${id}`}>Continue</Link>
+              <Link href={`/editor/${id}`}>{dictionary.common.continue}</Link>
             </Button>
           </div>
         </aside>

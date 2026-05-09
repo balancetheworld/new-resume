@@ -1,62 +1,44 @@
+'use client'
+
 import Link from 'next/link'
 import { SiteHeader } from '@/components/site/site-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { getResumeTemplates } from '@/lib/resume-templates'
+import { useTemplateStore } from '@/lib/template-store'
+import { useI18n } from '@/lib/i18n/context'
+import { TemplateUseButton } from '@/components/templates/template-use-button'
 
-const filters = ['All', 'Classic', 'Modern', 'Minimal', 'Creative', 'Tech']
-
-const templates = [
-  {
-    id: 'modern-blue',
-    name: 'Modern Blue',
-    description: '平衡招聘友好性与视觉识别度',
-    tags: ['Popular', 'Modern', 'Tech'],
-    featured: true,
-  },
-  {
-    id: 'classic-serif',
-    name: 'Classic Serif',
-    description: '适合法务、咨询和传统行业岗位',
-    tags: ['Classic'],
-  },
-  {
-    id: 'minimal-grid',
-    name: 'Minimal Grid',
-    description: '干净克制，适合产品和设计岗位',
-    tags: ['Minimal'],
-  },
-  {
-    id: 'creative-split',
-    name: 'Creative Split',
-    description: '更强的版式变化和卡片式信息结构',
-    tags: ['Creative'],
-  },
-  {
-    id: 'engineering-dark',
-    name: 'Engineering',
-    description: '突出技术栈、项目亮点和性能指标',
-    tags: ['Tech'],
-  },
-]
+const previewToneClassMap = {
+  blue: 'bg-gradient-to-br from-blue-50 to-slate-100',
+  stone: 'bg-gradient-to-br from-stone-50 to-slate-100',
+  cyan: 'bg-gradient-to-br from-cyan-50 to-slate-100',
+}
 
 export default function TemplatesPage() {
+  const selectedTemplateId = useTemplateStore((state) => state.selectedTemplateId)
+  const setSelectedTemplateId = useTemplateStore((state) => state.setSelectedTemplateId)
+  const { locale, dictionary } = useI18n()
+  const filters = dictionary.templates.filters
+  const resumeTemplates = getResumeTemplates(locale)
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader current="templates" />
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
         <section className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <div className="text-sm font-medium text-primary">Templates</div>
-            <h1 className="mt-2 text-3xl font-semibold text-foreground">Choose a layout</h1>
+            <div className="text-sm font-medium text-primary">{dictionary.templates.pageTag}</div>
+            <h1 className="mt-2 text-3xl font-semibold text-foreground">{dictionary.templates.pageTitle}</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              从不同风格模板开始，然后在编辑器里继续微调样式。
+              {dictionary.templates.pageDescription}
             </p>
           </div>
           <div className="flex w-full max-w-md gap-3">
-            <Input placeholder="Search templates" />
-            <Button variant="outline">Newest</Button>
+            <Input placeholder={dictionary.common.searchTemplates} />
+            <Button variant="outline">{dictionary.common.newest}</Button>
           </div>
         </section>
 
@@ -69,55 +51,68 @@ export default function TemplatesPage() {
         </section>
 
         <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {templates.map((template, index) => (
-            <Card
-              key={template.id}
-              className={`overflow-hidden rounded-3xl py-0 shadow-sm ${template.featured ? 'border-primary/40 ring-1 ring-primary/20' : ''}`}
-            >
-              <div
-                className={`h-52 p-5 ${
-                  index % 3 === 0
-                    ? 'bg-gradient-to-br from-blue-50 to-slate-100'
-                    : index % 3 === 1
-                      ? 'bg-gradient-to-br from-stone-50 to-slate-100'
-                      : 'bg-gradient-to-br from-cyan-50 to-slate-100'
-                }`}
+          {resumeTemplates.map((template) => {
+            const isSelected = selectedTemplateId === template.id
+
+            return (
+              <Card
+                key={template.id}
+                className={`overflow-hidden rounded-3xl py-0 shadow-sm ${template.featured ? 'border-primary/40 ring-1 ring-primary/20' : ''}`}
               >
-                <div className="h-full rounded-2xl border bg-white p-4 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="h-3 w-24 rounded-full bg-slate-900" />
-                    {template.featured && <Badge>Popular</Badge>}
-                  </div>
-                  <div className="mt-3 h-2 w-20 rounded-full bg-blue-500/80" />
-                  <div className="mt-5 space-y-2">
-                    <div className="h-2 rounded-full bg-slate-200" />
-                    <div className="h-2 w-10/12 rounded-full bg-slate-200" />
-                    <div className="h-2 w-8/12 rounded-full bg-slate-200" />
-                  </div>
-                  <div className="mt-5 grid grid-cols-2 gap-2">
-                    <div className="h-14 rounded-xl bg-slate-100" />
-                    <div className="h-14 rounded-xl bg-slate-100" />
+                <div className={`h-52 p-5 ${previewToneClassMap[template.previewTone]}`}>
+                  <div className="h-full rounded-2xl border bg-white p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div className="h-3 w-24 rounded-full bg-slate-900" />
+                      <div className="flex items-center gap-2">
+                        {template.featured && <Badge>{dictionary.common.popular}</Badge>}
+                        {isSelected && <Badge variant="secondary">{dictionary.common.current}</Badge>}
+                      </div>
+                    </div>
+                    <div
+                      className="mt-3 h-2 w-20 rounded-full"
+                      style={{ backgroundColor: template.style.accentColor }}
+                    />
+                    <div className="mt-5 space-y-2">
+                      <div className="h-2 rounded-full bg-slate-200" />
+                      <div className="h-2 w-10/12 rounded-full bg-slate-200" />
+                      <div className="h-2 w-8/12 rounded-full bg-slate-200" />
+                    </div>
+                    <div className="mt-5 grid grid-cols-2 gap-2">
+                      <div className="h-14 rounded-xl bg-slate-100" />
+                      <div className="h-14 rounded-xl bg-slate-100" />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <CardHeader className="px-5 py-4">
-                <CardTitle className="text-base">{template.name}</CardTitle>
-                <CardDescription>{template.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4 px-5 pb-5">
-                <div className="flex flex-wrap gap-2">
-                  {template.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-                <Button asChild className="w-full">
-                  <Link href={`/editor/${template.id}`}>Use this template</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                <CardHeader className="px-5 py-4">
+                  <CardTitle className="text-base">{template.name}</CardTitle>
+                  <CardDescription>{template.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 px-5 pb-5">
+                  <div className="flex flex-wrap gap-2">
+                    {template.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary">
+                        {dictionary.templates.tags[tag as keyof typeof dictionary.templates.tags] ?? tag}
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className="grid gap-2">
+                    <Button
+                      variant={isSelected ? 'secondary' : 'outline'}
+                      className="w-full"
+                      onClick={() => setSelectedTemplateId(template.id)}
+                    >
+                      {isSelected ? dictionary.common.currentSelected : dictionary.common.selectTemplate}
+                    </Button>
+                    <TemplateUseButton
+                      templateId={template.id}
+                      locale={locale}
+                      label={dictionary.common.useTemplate}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
 
           <Card className="overflow-hidden rounded-3xl border-dashed py-0 shadow-sm">
             <div className="flex h-52 items-center justify-center bg-slate-50">
@@ -126,12 +121,12 @@ export default function TemplatesPage() {
               </div>
             </div>
             <CardHeader className="px-5 py-4">
-              <CardTitle className="text-base">Custom layout</CardTitle>
-              <CardDescription>进入 DIY builder，自定义区块和排版结构</CardDescription>
+              <CardTitle className="text-base">{dictionary.templates.customLayout}</CardTitle>
+              <CardDescription>{dictionary.templates.customLayoutDescription}</CardDescription>
             </CardHeader>
             <CardContent className="px-5 pb-5">
               <Button variant="outline" asChild className="w-full">
-                <Link href="/builder">Open builder</Link>
+                <Link href="/builder">{dictionary.common.openBuilder}</Link>
               </Button>
             </CardContent>
           </Card>

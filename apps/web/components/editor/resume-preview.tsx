@@ -2,10 +2,9 @@
 
 import { cn } from '@/lib/utils'
 import { useResume } from '@/lib/resume-context'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Mail, Phone, MapPin, Globe, Linkedin, Github } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 function formatDate(dateStr: string) {
   if (!dateStr) return ''
@@ -13,23 +12,29 @@ function formatDate(dateStr: string) {
   return `${year}.${month}`
 }
 
+function normalizeLink(link: string) {
+  if (!link) return ''
+  if (link.startsWith('http://') || link.startsWith('https://')) return link
+  return `https://${link}`
+}
+
 export function ResumePreview() {
   const { state } = useResume()
-  const { personalInfo, workExperience, education, skills, projects, style } = state.data
+  const { personalInfo, workExperience, skills, projects, style } = state.data
+  const { dictionary } = useI18n()
   const fontFamilyMap = {
     inter: '"Inter", system-ui, sans-serif',
     'noto-sans-sc': '"Noto Sans SC", "PingFang SC", sans-serif',
     georgia: 'Georgia, serif',
-    'jetbrains-mono': '"JetBrains Mono", monospace',
   }
   const spacingMap = {
-    compact: {
+    tight: {
       section: 'mb-5',
       sectionTitle: 'mb-3',
       list: 'space-y-3',
       card: 'space-y-2',
     },
-    comfortable: {
+    fit: {
       section: 'mb-6',
       sectionTitle: 'mb-4',
       list: 'space-y-4',
@@ -43,259 +48,283 @@ export function ResumePreview() {
     },
   }
   const marginMap = {
-    narrow: 'p-6',
+    slim: 'p-6',
     normal: 'p-8',
     wide: 'p-10',
   }
-  const previewStyle = spacingMap[style.spacing]
+  const previewStyle = spacingMap[style.density]
+  const showSectionAccent = style.highlight.includes('sections')
+  const showHeaderAccent = style.highlight.includes('header')
+  const basicInfoItems = [
+    { label: dictionary.preview.basicInfo.jobTitle, value: personalInfo.jobTitle },
+    { label: dictionary.preview.basicInfo.gender, value: personalInfo.gender },
+    { label: dictionary.preview.basicInfo.educationLevel, value: personalInfo.educationLevel },
+    { label: dictionary.preview.basicInfo.school, value: personalInfo.school },
+    { label: dictionary.preview.basicInfo.major, value: personalInfo.major },
+    { label: dictionary.preview.basicInfo.phone, value: personalInfo.phone },
+    { label: dictionary.preview.basicInfo.qq, value: personalInfo.qq },
+    { label: dictionary.preview.basicInfo.wechat, value: personalInfo.wechat },
+  ].filter((item) => item.value)
+  const practiceExperiences = workExperience.filter(
+    (exp) =>
+      exp.company ||
+      exp.position ||
+      exp.location ||
+      exp.startDate ||
+      exp.endDate ||
+      exp.current ||
+      exp.description ||
+      exp.highlights.length > 0
+  )
+  const projectItems = projects.filter(
+    (project) =>
+      project.name ||
+      project.description ||
+      project.link ||
+      project.technologies.length > 0 ||
+      project.highlights.length > 0
+  )
+  const abilityItems = skills.flatMap((skill) => skill.items.filter(Boolean))
+  const hasPortfolio = !!personalInfo.portfolio
 
   return (
-    <div className="flex h-full flex-col bg-editor-preview">
-      <ScrollArea className="flex-1 p-6">
-        <div
-          className={cn(
-            'resume-preview mx-auto max-w-[210mm] rounded-2xl bg-resume-paper shadow-lg',
-            marginMap[style.margin],
-          )}
-          style={{
-            ['--resume-accent' as string]: style.accentColor,
-            fontFamily: fontFamilyMap[style.fontFamily],
-          }}
-        >
-          <header className={previewStyle.section}>
-            <h1 className="text-3xl font-bold text-foreground">{personalInfo.name}</h1>
-            <p className="mt-1 text-lg text-[var(--resume-accent)]">{personalInfo.title}</p>
-
-            <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
-              {personalInfo.email && (
-                <a
-                  href={`mailto:${personalInfo.email}`}
-                  className="flex items-center gap-1.5 hover:text-foreground"
-                >
-                  <Mail className="size-4" />
-                  {personalInfo.email}
-                </a>
-              )}
-              {personalInfo.phone && (
-                <span className="flex items-center gap-1.5">
-                  <Phone className="size-4" />
-                  {personalInfo.phone}
-                </span>
-              )}
-              {personalInfo.location && (
-                <span className="flex items-center gap-1.5">
-                  <MapPin className="size-4" />
-                  {personalInfo.location}
-                </span>
-              )}
-            </div>
-
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
-              {personalInfo.website && (
-                <a
-                  href={personalInfo.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 hover:text-foreground"
-                >
-                  <Globe className="size-4" />
-                  {personalInfo.website.replace(/^https?:\/\//, '')}
-                </a>
-              )}
-              {personalInfo.linkedin && (
-                <a
-                  href={`https://${personalInfo.linkedin.replace(/^https?:\/\//, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 hover:text-foreground"
-                >
-                  <Linkedin className="size-4" />
-                  {personalInfo.linkedin.replace(/^https?:\/\//, '')}
-                </a>
-              )}
-              {personalInfo.github && (
-                <a
-                  href={`https://${personalInfo.github.replace(/^https?:\/\//, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 hover:text-foreground"
-                >
-                  <Github className="size-4" />
-                  {personalInfo.github.replace(/^https?:\/\//, '')}
-                </a>
-              )}
-            </div>
-
-            {personalInfo.summary && (
-              <p className="mt-4 text-sm leading-relaxed text-foreground/80">
-                {personalInfo.summary}
-              </p>
+    <div className="folio-grid-bg flex h-full flex-col bg-editor-preview">
+      <div className="flex-1 overflow-auto">
+        <div className="flex min-h-full min-w-fit items-start justify-center px-4 py-6 sm:px-6 sm:py-8">
+          <div
+            className={cn(
+              'resume-preview aspect-[210/297] w-[640px] min-w-[640px] rounded-[4px] bg-resume-paper shadow-[0_1px_6px_rgba(0,0,0,0.04)] sm:w-[720px] sm:min-w-[720px] xl:w-[820px] xl:min-w-[820px]',
+              marginMap[style.margin],
             )}
-          </header>
+            style={{
+              ['--resume-accent' as string]: style.accentColor,
+              fontFamily: fontFamilyMap[style.fontFamily],
+            }}
+          >
+            <header className={previewStyle.section}>
+              <h1 className="text-3xl font-bold text-foreground">{personalInfo.name || dictionary.preview.name}</h1>
+              <p
+                className={cn(
+                  'mt-1 text-lg',
+                  showHeaderAccent ? 'text-[var(--resume-accent)]' : 'text-foreground',
+                )}
+              >
+                {personalInfo.jobTitle || dictionary.preview.jobTitle}
+              </p>
 
-          <Separator className={cn('my-6', style.spacing === 'airy' && 'my-7')} />
-
-          {workExperience.length > 0 && (
-            <section className={previewStyle.section}>
-              <h2 className={cn('text-lg font-semibold text-foreground', previewStyle.sectionTitle)}>
-                工作经历
-              </h2>
-              <div className={previewStyle.list}>
-                {workExperience.map((exp) => (
-                  <div key={exp.id}>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-medium text-foreground">{exp.position}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {exp.company}
-                          {exp.location && ` · ${exp.location}`}
-                        </p>
-                      </div>
-                      <span className="shrink-0 text-sm text-muted-foreground">
-                        {formatDate(exp.startDate)} - {exp.current ? '至今' : formatDate(exp.endDate)}
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                {basicInfoItems.length > 0
+                  ? basicInfoItems.map((item) => (
+                      <span key={item.label}>
+                        {item.label}：{item.value}
                       </span>
-                    </div>
-                    {exp.description && (
-                      <p className="mt-2 text-sm text-foreground/80">{exp.description}</p>
-                    )}
-                    {exp.highlights.length > 0 && (
-                      <ul className="mt-2 space-y-1">
-                        {exp.highlights.map((highlight, i) => (
-                          <li key={i} className="flex text-sm text-foreground/80">
-                            <span className="mr-2 text-[var(--resume-accent)]">•</span>
-                            {highlight}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {education.length > 0 && (
-            <section className={previewStyle.section}>
-              <h2 className={cn('text-lg font-semibold text-foreground', previewStyle.sectionTitle)}>
-                教育背景
-              </h2>
-              <div className={previewStyle.list}>
-                {education.map((edu) => (
-                  <div key={edu.id}>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-medium text-foreground">{edu.school}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {edu.degree} · {edu.field}
-                          {edu.gpa && ` · GPA: ${edu.gpa}`}
-                        </p>
-                      </div>
-                      <span className="shrink-0 text-sm text-muted-foreground">
-                        {formatDate(edu.startDate)} - {formatDate(edu.endDate)}
+                    ))
+                  : [
+                      dictionary.preview.basicInfo.gender,
+                      dictionary.preview.basicInfo.educationLevel,
+                      dictionary.preview.basicInfo.school,
+                      dictionary.preview.basicInfo.major,
+                      dictionary.preview.basicInfo.phone,
+                      dictionary.preview.basicInfo.qq,
+                      dictionary.preview.basicInfo.wechat,
+                    ].map((item) => (
+                      <span key={item}>
+                        {item}：{dictionary.preview.pending}
                       </span>
-                    </div>
-                    {edu.highlights.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {edu.highlights.map((highlight, i) => (
-                          <Badge
-                            key={i}
-                            variant="secondary"
-                            className="border-transparent bg-[color:var(--resume-accent)]/12 text-xs text-[var(--resume-accent)]"
-                          >
-                            {highlight}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                    ))}
+                <span>
+                  {dictionary.preview.basicInfo.github}：
+                  {personalInfo.github ? (
+                    <a
+                      href={normalizeLink(personalInfo.github)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-foreground"
+                    >
+                      {personalInfo.github}
+                    </a>
+                  ) : (
+                    dictionary.preview.pending
+                  )}
+                </span>
               </div>
-            </section>
-          )}
+            </header>
 
-          {skills.length > 0 && (
+            <Separator className={cn('my-6', style.density === 'airy' && 'my-7')} />
+
             <section className={previewStyle.section}>
-              <h2 className={cn('text-lg font-semibold text-foreground', previewStyle.sectionTitle)}>
-                专业技能
-              </h2>
-              <div className={previewStyle.card}>
-                {skills.map((skill) => (
-                  <div key={skill.id}>
-                    <h3 className="mb-2 text-sm font-medium text-foreground">{skill.category}</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {skill.items.map((item, i) => (
-                        <Badge
-                          key={i}
-                          variant="outline"
-                          className="border-[color:var(--resume-accent)]/20 bg-[color:var(--resume-accent)]/6 text-xs text-foreground"
-                        >
-                          {item}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {projects.length > 0 && (
-            <section>
-              <h2 className={cn('text-lg font-semibold text-foreground', previewStyle.sectionTitle)}>
-                项目经历
+              <h2
+                className={cn(
+                  'text-lg font-semibold text-foreground',
+                  previewStyle.sectionTitle,
+                  showSectionAccent && 'text-[var(--resume-accent)]',
+                )}
+              >
+                {dictionary.preview.practice}
               </h2>
               <div className={previewStyle.list}>
-                {projects.map((project) => (
-                  <div key={project.id}>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-medium text-foreground">
-                          {project.name}
-                          {project.link && (
-                            <a
-                              href={project.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ml-2 text-sm font-normal text-[var(--resume-accent)] hover:underline"
-                            >
-                              查看项目
-                            </a>
+                {practiceExperiences.length > 0 ? (
+                  practiceExperiences.map((exp) => (
+                    <div key={exp.id}>
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="font-medium text-foreground">
+                            {exp.position || dictionary.preview.roleName}
+                            {exp.company && ` / ${exp.company}`}
+                          </h3>
+                          {(exp.location || exp.description) && (
+                            <p className="text-sm text-muted-foreground">
+                              {[exp.location, exp.description].filter(Boolean).join(' · ')}
+                            </p>
                           )}
-                        </h3>
+                        </div>
+                        {(exp.startDate || exp.endDate || exp.current) && (
+                          <span className="shrink-0 text-sm text-muted-foreground">
+                            {formatDate(exp.startDate)}
+                            {exp.startDate || exp.endDate || exp.current ? ' - ' : ''}
+                            {exp.current ? dictionary.preview.present : formatDate(exp.endDate)}
+                          </span>
+                        )}
                       </div>
+                      {exp.highlights.length > 0 && (
+                        <ul className="mt-2 space-y-1">
+                          {exp.highlights.map((highlight, i) => (
+                            <li key={i} className="flex text-sm text-foreground/80">
+                              <span className="mr-2 text-[var(--resume-accent)]">•</span>
+                              {highlight}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
-                    {project.description && (
-                      <p className="mt-1 text-sm text-foreground/80">{project.description}</p>
-                    )}
-                    {project.technologies.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {project.technologies.map((tech, i) => (
-                          <Badge
-                            key={i}
-                            className="border-transparent bg-[color:var(--resume-accent)] text-xs text-white"
-                          >
-                            {tech}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                    {project.highlights.length > 0 && (
-                      <ul className="mt-2 space-y-1">
-                        {project.highlights.map((highlight, i) => (
-                          <li key={i} className="flex text-sm text-foreground/80">
-                            <span className="mr-2 text-[var(--resume-accent)]">•</span>
-                            {highlight}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                  ))
+                ) : (
+                  <div className="text-sm leading-6 text-muted-foreground">
+                    {dictionary.preview.fillPractice}
                   </div>
-                ))}
+                )}
               </div>
             </section>
-          )}
+
+            <section className={previewStyle.section}>
+              <h2
+                className={cn(
+                  'text-lg font-semibold text-foreground',
+                  previewStyle.sectionTitle,
+                  showSectionAccent && 'text-[var(--resume-accent)]',
+                )}
+              >
+                {dictionary.preview.projects}
+              </h2>
+              <div className={previewStyle.list}>
+                {projectItems.length > 0 ? (
+                  projectItems.map((project) => (
+                    <div key={project.id}>
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="font-medium text-foreground">{project.name || dictionary.preview.projectName}</h3>
+                          {project.description && (
+                            <p className="mt-1 text-sm text-foreground/80">{project.description}</p>
+                          )}
+                        </div>
+                        {project.link && (
+                          <a
+                            href={normalizeLink(project.link)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="shrink-0 text-sm text-[var(--resume-accent)] hover:underline"
+                          >
+                            {dictionary.preview.viewProject}
+                          </a>
+                        )}
+                      </div>
+                      {project.technologies.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {project.technologies.map((tech, i) => (
+                            <Badge
+                              key={i}
+                              className="border-transparent bg-[color:var(--resume-accent)] text-xs text-white"
+                            >
+                              {tech}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      {project.highlights.length > 0 && (
+                        <ul className="mt-2 space-y-1">
+                          {project.highlights.map((highlight, i) => (
+                            <li key={i} className="flex text-sm text-foreground/80">
+                              <span className="mr-2 text-[var(--resume-accent)]">•</span>
+                              {highlight}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm leading-6 text-muted-foreground">
+                    {dictionary.preview.fillProjects}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className={previewStyle.section}>
+              <h2
+                className={cn(
+                  'text-lg font-semibold text-foreground',
+                  previewStyle.sectionTitle,
+                  showSectionAccent && 'text-[var(--resume-accent)]',
+                )}
+              >
+                {dictionary.preview.portfolio}
+              </h2>
+              {hasPortfolio ? (
+                <a
+                  href={normalizeLink(personalInfo.portfolio)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-[var(--resume-accent)] hover:underline"
+                >
+                  {personalInfo.portfolio}
+                </a>
+              ) : (
+                <div className="text-sm leading-6 text-muted-foreground">{dictionary.preview.fillPortfolio}</div>
+              )}
+            </section>
+
+            <section>
+              <h2
+                className={cn(
+                  'text-lg font-semibold text-foreground',
+                  previewStyle.sectionTitle,
+                  showSectionAccent && 'text-[var(--resume-accent)]',
+                )}
+              >
+                {dictionary.preview.abilities}
+              </h2>
+              {abilityItems.length > 0 ? (
+                <div className={previewStyle.card}>
+                  <div className="flex flex-wrap gap-2">
+                    {abilityItems.map((item, i) => (
+                      <Badge
+                        key={`${item}-${i}`}
+                        variant="outline"
+                        className="border-[color:var(--resume-accent)]/20 bg-[color:var(--resume-accent)]/6 text-xs text-foreground"
+                      >
+                        {item}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm leading-6 text-muted-foreground">{dictionary.preview.fillAbilities}</div>
+              )}
+            </section>
+          </div>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   )
 }

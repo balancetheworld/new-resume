@@ -2,12 +2,12 @@
 
 import { useResume, type Skill } from '@/lib/resume-context'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Plus, Trash2, GripVertical, X } from 'lucide-react'
 import { useState } from 'react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface SkillsFormProps {
   skills: Skill[]
@@ -16,6 +16,7 @@ interface SkillsFormProps {
 export function SkillsForm({ skills }: SkillsFormProps) {
   const { updateSkill, addSkill, removeSkill } = useResume()
   const [newSkillInputs, setNewSkillInputs] = useState<Record<string, string>>({})
+  const { dictionary } = useI18n()
 
   const handleAddSkillItem = (id: string) => {
     const input = newSkillInputs[id]?.trim()
@@ -58,26 +59,16 @@ export function SkillsForm({ skills }: SkillsFormProps) {
                 <GripVertical className="size-4 text-muted-foreground" />
                 <div className="text-left">
                   <div className="font-medium">
-                    {skill.category || `技能分类 ${index + 1}`}
+                    {dictionary.form.personalAbilities}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {skill.items.length} 项技能
+                    {skill.items.length} {dictionary.form.abilityCount}
                   </div>
                 </div>
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label>分类名称</Label>
-                <Input
-                  value={skill.category}
-                  onChange={(e) => updateSkill(skill.id, { category: e.target.value })}
-                  placeholder="例如: 前端技术、工具与平台"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>技能列表</Label>
                 <div className="flex flex-wrap gap-2">
                   {skill.items.map((item, itemIndex) => (
                     <Badge key={itemIndex} variant="secondary" className="gap-1 pr-1">
@@ -88,7 +79,9 @@ export function SkillsForm({ skills }: SkillsFormProps) {
                         className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20"
                       >
                         <X className="size-3" />
-                        <span className="sr-only">删除 {item}</span>
+                        <span className="sr-only">
+                          {dictionary.form.removeItem} {item}
+                        </span>
                       </button>
                     </Badge>
                   ))}
@@ -100,7 +93,7 @@ export function SkillsForm({ skills }: SkillsFormProps) {
                       setNewSkillInputs((prev) => ({ ...prev, [skill.id]: e.target.value }))
                     }
                     onKeyDown={(e) => handleKeyDown(e, skill.id)}
-                    placeholder="输入技能名称，按回车添加"
+                    placeholder={dictionary.form.placeholders.addAbility}
                   />
                   <Button
                     type="button"
@@ -108,7 +101,7 @@ export function SkillsForm({ skills }: SkillsFormProps) {
                     size="sm"
                     onClick={() => handleAddSkillItem(skill.id)}
                   >
-                    添加
+                    {dictionary.form.addAbility}
                   </Button>
                 </div>
               </div>
@@ -120,7 +113,7 @@ export function SkillsForm({ skills }: SkillsFormProps) {
                 className="w-full"
               >
                 <Trash2 className="mr-2 size-4" />
-                删除此分类
+                {dictionary.form.deleteCategory}
               </Button>
             </AccordionContent>
           </AccordionItem>
@@ -129,7 +122,7 @@ export function SkillsForm({ skills }: SkillsFormProps) {
 
       <Button variant="outline" className="w-full" onClick={addSkill}>
         <Plus className="mr-2 size-4" />
-        添加技能分类
+        {dictionary.editor.addAbilityGroup}
       </Button>
     </div>
   )

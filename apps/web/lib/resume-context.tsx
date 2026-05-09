@@ -1,18 +1,22 @@
 'use client'
 
 import React, { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react'
+import { createDemoResumeData, createEmptyResumeData } from '@/lib/resume-data'
+import { setLastResumeId, upsertResumeIndexItem } from '@/lib/resume-storage'
 
 // Types
 export interface PersonalInfo {
   name: string
-  title: string
-  email: string
+  jobTitle: string
+  gender: string
+  educationLevel: string
+  school: string
+  major: string
+  qq: string
+  wechat: string
   phone: string
-  location: string
-  website?: string
-  linkedin?: string
-  github?: string
-  summary: string
+  github: string
+  portfolio: string
 }
 
 export interface WorkExperience {
@@ -54,20 +58,30 @@ export interface Project {
   highlights: string[]
 }
 
+export type ResumeStatus = 'editing' | 'draft' | 'exported'
+
 export interface ResumeStyle {
   accentColor: string
-  fontFamily: 'inter' | 'noto-sans-sc' | 'georgia' | 'jetbrains-mono'
-  spacing: 'compact' | 'comfortable' | 'airy'
-  margin: 'narrow' | 'normal' | 'wide'
+  fontFamily: 'inter' | 'noto-sans-sc' | 'georgia'
+  density: 'tight' | 'fit' | 'airy'
+  margin: 'slim' | 'normal' | 'wide'
+  highlight: Array<'none' | 'sections' | 'header'>
 }
 
 export interface ResumeData {
+  resumeName: string
+  templateId: string
+  templateName: string
   personalInfo: PersonalInfo
   workExperience: WorkExperience[]
   education: Education[]
   skills: Skill[]
   projects: Project[]
   style: ResumeStyle
+  status: ResumeStatus
+  pages: number
+  createdAt: string
+  updatedAt: string
 }
 
 export type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error'
@@ -80,6 +94,7 @@ interface ResumeState {
 
 type ResumeAction =
   | { type: 'UPDATE_PERSONAL_INFO'; payload: Partial<PersonalInfo> }
+  | { type: 'UPDATE_TEMPLATE'; payload: Pick<ResumeData, 'templateId' | 'templateName' | 'style'> }
   | { type: 'UPDATE_WORK_EXPERIENCE'; payload: { id: string; data: Partial<WorkExperience> } }
   | { type: 'ADD_WORK_EXPERIENCE' }
   | { type: 'REMOVE_WORK_EXPERIENCE'; payload: string }
@@ -101,118 +116,21 @@ type ResumeAction =
 const generateId = () => Math.random().toString(36).substring(2, 11)
 
 const defaultResumeData: ResumeData = {
-  personalInfo: {
-    name: '张三',
-    title: '高级前端工程师',
-    email: 'zhangsan@example.com',
-    phone: '+86 138 0000 0000',
-    location: '北京市朝阳区',
-    website: 'https://zhangsan.dev',
-    linkedin: 'linkedin.com/in/zhangsan',
-    github: 'github.com/zhangsan',
-    summary: '拥有 5 年以上前端开发经验，专注于 React 生态系统和现代 Web 技术。善于将复杂的业务需求转化为优雅的技术方案，对代码质量和用户体验有极高的追求。',
-  },
-  workExperience: [
-    {
-      id: generateId(),
-      company: '科技创新有限公司',
-      position: '高级前端工程师',
-      location: '北京',
-      startDate: '2022-03',
-      endDate: '',
-      current: true,
-      description: '负责公司核心产品的前端架构设计与开发',
-      highlights: [
-        '主导设计并实现了新一代设计系统，提升团队开发效率 40%',
-        '优化核心页面性能，首屏加载时间从 3s 降低至 1.2s',
-        '搭建前端监控体系，错误发现率提升 80%',
-      ],
-    },
-    {
-      id: generateId(),
-      company: '互联网科技公司',
-      position: '前端工程师',
-      location: '上海',
-      startDate: '2019-07',
-      endDate: '2022-02',
-      current: false,
-      description: '参与多个 B 端和 C 端项目的开发',
-      highlights: [
-        '开发并维护公司内部组件库，被 10+ 个项目使用',
-        '负责移动端 H5 项目开发，用户量达到 100 万+',
-      ],
-    },
-  ],
-  education: [
-    {
-      id: generateId(),
-      school: '清华大学',
-      degree: '硕士',
-      field: '计算机科学与技术',
-      location: '北京',
-      startDate: '2017-09',
-      endDate: '2019-06',
-      gpa: '3.8/4.0',
-      highlights: ['校级奖学金', '优秀毕业论文'],
-    },
-    {
-      id: generateId(),
-      school: '北京理工大学',
-      degree: '学士',
-      field: '软件工程',
-      location: '北京',
-      startDate: '2013-09',
-      endDate: '2017-06',
-      gpa: '3.6/4.0',
-      highlights: [],
-    },
-  ],
-  skills: [
-    {
-      id: generateId(),
-      category: '前端技术',
-      items: ['React', 'TypeScript', 'Next.js', 'Vue.js', 'Tailwind CSS'],
-    },
-    {
-      id: generateId(),
-      category: '工具与平台',
-      items: ['Git', 'Docker', 'CI/CD', 'AWS', 'Vercel'],
-    },
-    {
-      id: generateId(),
-      category: '其他技能',
-      items: ['Node.js', 'GraphQL', 'PostgreSQL', 'Redis'],
-    },
-  ],
-  projects: [
-    {
-      id: generateId(),
-      name: '企业级设计系统',
-      description: '为公司构建的完整设计系统，包含 50+ 组件',
-      technologies: ['React', 'TypeScript', 'Storybook', 'Testing Library'],
-      link: 'https://github.com/example/design-system',
-      highlights: [
-        '支持主题定制和国际化',
-        '完善的无障碍访问支持',
-        '100% TypeScript 类型覆盖',
-      ],
-    },
-  ],
-  style: {
-    accentColor: '#378ADD',
-    fontFamily: 'inter',
-    spacing: 'comfortable',
-    margin: 'normal',
-  },
+  ...createDemoResumeData(),
 }
 
 function normalizeResumeData(data: Partial<ResumeData>): ResumeData {
+  const legacyPersonalInfo = (data.personalInfo ?? {}) as Partial<PersonalInfo> & {
+    title?: string
+  }
+
   return {
     ...defaultResumeData,
     ...data,
     personalInfo: {
       ...defaultResumeData.personalInfo,
       ...data.personalInfo,
+      jobTitle: data.personalInfo?.jobTitle ?? legacyPersonalInfo.title ?? defaultResumeData.personalInfo.jobTitle,
     },
     workExperience: data.workExperience ?? defaultResumeData.workExperience,
     education: data.education ?? defaultResumeData.education,
@@ -221,6 +139,7 @@ function normalizeResumeData(data: Partial<ResumeData>): ResumeData {
     style: {
       ...defaultResumeData.style,
       ...data.style,
+      highlight: data.style?.highlight ?? defaultResumeData.style.highlight,
     },
   }
 }
@@ -233,6 +152,17 @@ function resumeReducer(state: ResumeState, action: ResumeAction): ResumeState {
         data: {
           ...state.data,
           personalInfo: { ...state.data.personalInfo, ...action.payload },
+        },
+        saveStatus: 'unsaved',
+      }
+    case 'UPDATE_TEMPLATE':
+      return {
+        ...state,
+        data: {
+          ...state.data,
+          templateId: action.payload.templateId,
+          templateName: action.payload.templateName,
+          style: action.payload.style,
         },
         saveStatus: 'unsaved',
       }
@@ -430,6 +360,7 @@ interface ResumeContextValue {
   state: ResumeState
   dispatch: React.Dispatch<ResumeAction>
   updatePersonalInfo: (data: Partial<PersonalInfo>) => void
+  updateTemplate: (data: Pick<ResumeData, 'templateId' | 'templateName' | 'style'>) => void
   updateWorkExperience: (id: string, data: Partial<WorkExperience>) => void
   addWorkExperience: () => void
   removeWorkExperience: (id: string) => void
@@ -449,19 +380,30 @@ const ResumeContext = createContext<ResumeContextValue | null>(null)
 
 const STORAGE_KEY = 'resume-editor-data'
 
-export function ResumeProvider({ children }: { children: React.ReactNode }) {
+export function ResumeProvider({
+  children,
+  initialData,
+  storageKey,
+  resumeId,
+}: {
+  children: React.ReactNode
+  initialData?: ResumeData
+  storageKey?: string
+  resumeId?: string
+}) {
   const [state, dispatch] = useReducer(resumeReducer, {
-    data: defaultResumeData,
+    data: normalizeResumeData(initialData ?? defaultResumeData),
     saveStatus: 'saved',
     lastSaved: null,
   })
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const activeStorageKey = storageKey || STORAGE_KEY
 
   // Load data from localStorage on mount
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY)
+      const saved = localStorage.getItem(activeStorageKey)
       if (saved) {
         const parsed = JSON.parse(saved)
         dispatch({ type: 'LOAD_DATA', payload: normalizeResumeData(parsed) })
@@ -469,7 +411,7 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       console.error('Failed to load saved resume data:', e)
     }
-  }, [])
+  }, [activeStorageKey])
 
   // Auto-save with debounce
   useEffect(() => {
@@ -482,7 +424,14 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: 'SET_SAVE_STATUS', payload: 'saving' })
 
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data))
+          localStorage.setItem(activeStorageKey, JSON.stringify(state.data))
+          if (resumeId) {
+            upsertResumeIndexItem(resumeId, {
+              ...state.data,
+              updatedAt: new Date().toISOString(),
+            })
+            setLastResumeId(resumeId)
+          }
           dispatch({ type: 'SET_SAVE_STATUS', payload: 'saved' })
           dispatch({ type: 'SET_LAST_SAVED', payload: new Date() })
         } catch (e) {
@@ -497,10 +446,14 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
         clearTimeout(saveTimeoutRef.current)
       }
     }
-  }, [state.saveStatus, state.data])
+  }, [activeStorageKey, resumeId, state.saveStatus, state.data])
 
   const updatePersonalInfo = useCallback((data: Partial<PersonalInfo>) => {
     dispatch({ type: 'UPDATE_PERSONAL_INFO', payload: data })
+  }, [])
+
+  const updateTemplate = useCallback((data: Pick<ResumeData, 'templateId' | 'templateName' | 'style'>) => {
+    dispatch({ type: 'UPDATE_TEMPLATE', payload: data })
   }, [])
 
   const updateWorkExperience = useCallback((id: string, data: Partial<WorkExperience>) => {
@@ -561,6 +514,7 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
         state,
         dispatch,
         updatePersonalInfo,
+        updateTemplate,
         updateWorkExperience,
         addWorkExperience,
         removeWorkExperience,
