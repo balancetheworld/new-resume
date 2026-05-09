@@ -116,6 +116,10 @@
   color: var(--folio-text);
 }
 
+.editor-divider-active {
+  background: color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
 @media print {
   @page {
     size: A4;
