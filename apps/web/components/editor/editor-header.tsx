@@ -9,7 +9,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { FileText, Download, Eye, Menu } from 'lucide-react'
+import { Download, Eye, Menu } from 'lucide-react'
 
 interface EditorHeaderProps {
   resumeId: string
@@ -41,13 +41,6 @@ export function EditorHeader({ resumeId, mode, onMobileMenuClick }: EditorHeader
             <Menu className="size-5" />
           </Button>
         )}
-        <div className="flex items-center gap-3">
-          <div className="flex size-6 items-center justify-center rounded-md bg-primary">
-            <FileText className="size-3.5 text-primary-foreground" />
-          </div>
-          <div className="text-[14px] font-medium text-foreground">Folio.</div>
-        </div>
-        <div className="hidden text-[11px] text-[rgba(58,58,74,0.18)] sm:block">/</div>
         <div className="min-w-0">
           <div className="truncate text-[13px] font-medium text-[rgba(58,58,74,0.45)]">
             {data.resumeName}

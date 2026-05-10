@@ -22,7 +22,7 @@ export function LanguageSwitcher() {
       <span className="hidden text-[10px] font-medium text-muted-foreground sm:inline">
         {dictionary.language.label}
       </span>
-      <div className="flex rounded-md border bg-background p-0.5">
+      <div className="flex rounded-lg border bg-background p-0.5">
         {locales.map((item) => {
           const active = locale === item
 
@@ -32,7 +32,7 @@ export function LanguageSwitcher() {
               type="button"
               onClick={() => handleChange(item)}
               disabled={isPending || active}
-              className={`rounded px-2 py-1 text-[10px] font-medium ${
+              className={`rounded-md px-2 py-1 text-[10px] font-medium ${
                 active ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
             >

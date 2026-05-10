@@ -52,7 +52,7 @@ export function SkillsForm({ skills }: SkillsFormProps) {
           <AccordionItem
             key={skill.id}
             value={skill.id}
-            className="rounded-lg border bg-card px-4"
+            className="rounded-xl border border-[#d8e3f3] bg-[#f9fbff] px-4 shadow-[0_6px_18px_rgba(52,78,118,0.04)] data-[state=open]:border-primary"
           >
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-3">

@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: 1280,
   initialScale: 1,
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
@@ -38,7 +38,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} className={`${inter.variable} bg-background`}>
-      <body className="font-sans antialiased">
+      <body className="min-w-[1280px] font-sans antialiased">
         <I18nProvider locale={locale} dictionary={dictionary}>
           {children}
         </I18nProvider>
