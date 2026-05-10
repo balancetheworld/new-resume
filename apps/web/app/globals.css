@@ -4,43 +4,43 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --folio-primary: #85b7eb;
-  --folio-primary-light: #e6f1fb;
-  --folio-primary-dark: #2a5a80;
-  --folio-blue-light: #b5d4f4;
-  --folio-purple: #afa9ec;
-  --folio-purple-light: #cecbf6;
-  --folio-purple-bg: #eeeafb;
-  --folio-purple-dark: #3d3d5a;
-  --folio-text: #3d3d4d;
-  --folio-text-weak: rgba(58, 58, 74, 0.3);
-  --folio-text-weaker: rgba(58, 58, 74, 0.15);
-  --folio-border: rgba(58, 58, 74, 0.06);
-  --folio-border-strong: rgba(58, 58, 74, 0.08);
-  --folio-bg-preview: #eef1f5;
-  --folio-bg-grid: rgba(230, 241, 251, 0.45);
-  --background: #ffffff;
-  --foreground: #3d3d4d;
-  --card: #ffffff;
-  --card-foreground: #3d3d4d;
-  --popover: #ffffff;
-  --popover-foreground: #3d3d4d;
-  --primary: #85b7eb;
+  --folio-primary: #4f86df;
+  --folio-primary-light: #dbe7fb;
+  --folio-primary-dark: #224d93;
+  --folio-blue-light: #b1cdf7;
+  --folio-purple: #5f82d8;
+  --folio-purple-light: #d9e4fb;
+  --folio-purple-bg: #edf2fb;
+  --folio-purple-dark: #304b83;
+  --folio-text: #243754;
+  --folio-text-weak: rgba(36, 55, 84, 0.42);
+  --folio-text-weaker: rgba(36, 55, 84, 0.18);
+  --folio-border: rgba(83, 116, 173, 0.15);
+  --folio-border-strong: rgba(83, 116, 173, 0.22);
+  --folio-bg-preview: #e3ecf8;
+  --folio-bg-grid: rgba(118, 154, 212, 0.24);
+  --background: #edf3fb;
+  --foreground: #243754;
+  --card: #f8fbff;
+  --card-foreground: #243754;
+  --popover: #f8fbff;
+  --popover-foreground: #243754;
+  --primary: #4f86df;
   --primary-foreground: #ffffff;
-  --secondary: #e6f1fb;
-  --secondary-foreground: #2a5a80;
-  --muted: #f8faff;
-  --muted-foreground: rgba(58, 58, 74, 0.3);
-  --accent: #f7f8fc;
-  --accent-foreground: #3d3d4d;
-  --destructive: #afa9ec;
+  --secondary: #dfe9f8;
+  --secondary-foreground: #224d93;
+  --muted: #edf3fb;
+  --muted-foreground: rgba(36, 55, 84, 0.42);
+  --accent: #e6eef9;
+  --accent-foreground: #243754;
+  --destructive: #5f82d8;
   --destructive-foreground: #ffffff;
-  --border: rgba(58, 58, 74, 0.06);
-  --input: rgba(58, 58, 74, 0.08);
-  --ring: #85b7eb;
+  --border: rgba(83, 116, 173, 0.15);
+  --input: rgba(83, 116, 173, 0.2);
+  --ring: #4f86df;
   --radius: 0.75rem;
-  --editor-sidebar: #ffffff;
-  --editor-preview: #eef1f5;
+  --editor-sidebar: #f6faff;
+  --editor-preview: #e3ecf8;
   --resume-paper: #ffffff;
 }
 
@@ -82,6 +82,10 @@
   body {
     @apply bg-background text-foreground;
     font-size: 12px;
+    background-image:
+      radial-gradient(circle at top left, rgba(143, 173, 221, 0.14), transparent 30%),
+      radial-gradient(circle at right 16%, rgba(211, 225, 245, 0.32), transparent 24%),
+      linear-gradient(180deg, #f5f8fd 0%, #ebf1fa 52%, #e6edf8 100%);
   }
   a,
   button {
@@ -94,7 +98,7 @@
 }
 
 .folio-grid-bg {
-  background-color: #ffffff;
+  background-color: var(--editor-preview);
   background-image:
     linear-gradient(var(--folio-bg-grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--folio-bg-grid) 1px, transparent 1px);

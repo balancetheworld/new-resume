@@ -93,7 +93,7 @@ export function ResumePreview() {
         <div className="flex min-h-full min-w-fit items-start justify-center px-4 py-6 sm:px-6 sm:py-8">
           <div
             className={cn(
-              'resume-preview aspect-[210/297] w-[640px] min-w-[640px] rounded-[4px] bg-resume-paper shadow-[0_1px_6px_rgba(0,0,0,0.04)] sm:w-[720px] sm:min-w-[720px] xl:w-[820px] xl:min-w-[820px]',
+              'resume-preview aspect-[210/297] w-[640px] min-w-[640px] rounded-[4px] border border-[#d9e5f4] bg-resume-paper shadow-[0_16px_38px_rgba(59,87,133,0.12)] sm:w-[720px] sm:min-w-[720px] xl:w-[820px] xl:min-w-[820px]',
               marginMap[style.margin],
             )}
             style={{
