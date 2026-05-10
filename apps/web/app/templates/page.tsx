@@ -1,13 +1,13 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect } from 'react'
 import { SiteHeader } from '@/components/site/site-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { getResumeTemplates } from '@/lib/resume-templates'
-import { useTemplateStore } from '@/lib/template-store'
+import { getResumeTemplateDefinitions } from '@/lib/template-registry'
 import { useI18n } from '@/lib/i18n/context'
 import { TemplateUseButton } from '@/components/templates/template-use-button'
 
@@ -18,11 +18,9 @@ const previewToneClassMap = {
 }
 
 export default function TemplatesPage() {
-  const selectedTemplateId = useTemplateStore((state) => state.selectedTemplateId)
-  const setSelectedTemplateId = useTemplateStore((state) => state.setSelectedTemplateId)
   const { locale, dictionary } = useI18n()
   const filters = dictionary.templates.filters
-  const resumeTemplates = getResumeTemplates(locale)
+  const resumeTemplates = getResumeTemplateDefinitions(locale).map((template) => template.meta)
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,8 +50,6 @@ export default function TemplatesPage() {
 
         <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {resumeTemplates.map((template) => {
-            const isSelected = selectedTemplateId === template.id
-
             return (
               <Card
                 key={template.id}
@@ -65,7 +61,6 @@ export default function TemplatesPage() {
                       <div className="h-3 w-24 rounded-full bg-slate-900" />
                       <div className="flex items-center gap-2">
                         {template.featured && <Badge>{dictionary.common.popular}</Badge>}
-                        {isSelected && <Badge variant="secondary">{dictionary.common.current}</Badge>}
                       </div>
                     </div>
                     <div
@@ -96,13 +91,6 @@ export default function TemplatesPage() {
                     ))}
                   </div>
                   <div className="grid gap-2">
-                    <Button
-                      variant={isSelected ? 'secondary' : 'outline'}
-                      className="w-full"
-                      onClick={() => setSelectedTemplateId(template.id)}
-                    >
-                      {isSelected ? dictionary.common.currentSelected : dictionary.common.selectTemplate}
-                    </Button>
                     <TemplateUseButton
                       templateId={template.id}
                       locale={locale}

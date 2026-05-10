@@ -81,3 +81,30 @@ export function readResumeData(resumeId: string) {
     return null
   }
 }
+
+export function writeResumeData(resumeId: string, data: ResumeData) {
+  if (typeof window === 'undefined') return
+  localStorage.setItem(getResumeStorageKey(resumeId), JSON.stringify(data))
+}
+
+export function clearAllResumeData() {
+  if (typeof window === 'undefined') return
+
+  const keysToRemove: string[] = []
+
+  for (let i = 0; i < localStorage.length; i += 1) {
+    const key = localStorage.key(i)
+
+    if (!key) {
+      continue
+    }
+
+    if (key.startsWith(STORAGE_PREFIX) || key === INDEX_STORAGE_KEY || key === LAST_RESUME_ID_KEY) {
+      keysToRemove.push(key)
+    }
+  }
+
+  keysToRemove.forEach((key) => {
+    localStorage.removeItem(key)
+  })
+}

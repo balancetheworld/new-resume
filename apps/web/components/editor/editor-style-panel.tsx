@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { useResume } from '@/lib/resume-context'
 import { Button } from '@/components/ui/button'
-import { useTemplateStore } from '@/lib/template-store'
 import { getResumeTemplate } from '@/lib/resume-templates'
 import { useI18n } from '@/lib/i18n/context'
 
@@ -18,8 +17,7 @@ const fontOptions = [
 export function EditorStylePanel() {
   const { state, updateStyle, updateTemplate } = useResume()
   const { style } = state.data
-  const selectedTemplateId = useTemplateStore((store) => store.selectedTemplateId)
-  const currentTemplate = getResumeTemplate(selectedTemplateId || state.data.templateId)
+  const currentTemplate = getResumeTemplate(state.data.templateId)
   const { dictionary } = useI18n()
 
   const handleApplyCurrentTemplate = () => {

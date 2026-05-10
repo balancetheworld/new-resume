@@ -6,7 +6,7 @@ import { SiteHeader } from '@/components/site/site-header'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { getResumeTemplate } from '@/lib/resume-templates'
+import { getResumeTemplateDefinition } from '@/lib/template-registry'
 import { useI18n } from '@/lib/i18n/context'
 import { readResumeIndex, type ResumeListItem } from '@/lib/resume-storage'
 
@@ -58,7 +58,7 @@ export default function ResumesPage() {
 
         <section className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {resumes.map((resume) => {
-            const template = getResumeTemplate(resume.templateId, locale)
+            const template = getResumeTemplateDefinition(resume.templateId, locale).meta
 
             return (
               <Link key={resume.id} href={`/editor/${resume.id}`}>

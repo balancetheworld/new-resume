@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { getI18n } from '@/lib/i18n/server'
+import { ResumeStorageReset } from '@/components/app/resume-storage-reset'
 import { I18nProvider } from '@/lib/i18n/context'
 import './globals.css'
 
@@ -40,6 +41,7 @@ export default async function RootLayout({
     <html lang={locale} className={`${inter.variable} bg-background`}>
       <body className="min-w-[1280px] font-sans antialiased">
         <I18nProvider locale={locale} dictionary={dictionary}>
+          <ResumeStorageReset />
           {children}
         </I18nProvider>
       </body>

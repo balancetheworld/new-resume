@@ -1,6 +1,5 @@
 import { ResumeEditor } from '@/components/editor/resume-editor'
-import { createDemoResumeData, createEmptyResumeData } from '@/lib/resume-data'
-import { getResumeTemplate } from '@/lib/resume-templates'
+import { createEmptyResumeData } from '@/lib/resume-data'
 import { getLocale } from '@/lib/i18n/server'
 
 export default async function EditorPage({
@@ -10,15 +9,12 @@ export default async function EditorPage({
 }) {
   const { id } = await params
   const locale = await getLocale()
-  const template = getResumeTemplate(undefined, locale)
 
   return (
     <ResumeEditor
       resumeId={id}
       mode="editor"
-      initialData={
-        createDemoResumeData(id, template.id, locale)
-      }
+      initialData={createEmptyResumeData(undefined, locale)}
     />
   )
 }
