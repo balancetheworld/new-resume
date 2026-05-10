@@ -2,9 +2,9 @@
 
 import Link from 'next/link'
 import { ResumeProvider } from '@/lib/resume-context'
-import { createDemoResumeData, createEmptyResumeData } from '@/lib/resume-data'
-import { getResumeTemplate } from '@/lib/resume-templates'
-import { ResumePreview } from './resume-preview'
+import { createEmptyResumeData } from '@/lib/resume-data'
+import { getResumeTemplateDefinition } from '@/lib/template-registry'
+import { useResume } from '@/lib/resume-context'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Download } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/context'
@@ -15,35 +15,45 @@ interface ResumePreviewScreenProps {
   locale: Locale
 }
 
-export function ResumePreviewScreen({ resumeId, locale }: ResumePreviewScreenProps) {
-  const template = getResumeTemplate(undefined, locale)
+function ResumePreviewScreenContent({
+  resumeId,
+}: {
+  resumeId: string
+}) {
+  const { state } = useResume()
   const { dictionary } = useI18n()
+  const templateDefinition = getResumeTemplateDefinition(state.data.templateId)
+  const TemplatePreview = templateDefinition.Preview
 
   return (
+    <div className="flex min-h-screen flex-col bg-slate-100">
+      <header className="no-print flex h-16 items-center justify-between border-b bg-card px-5">
+        <Button variant="outline" asChild>
+          <Link href={`/editor/${resumeId}`}>
+            <ArrowLeft className="size-4" />
+            {dictionary.editor.backToEditor}
+          </Link>
+        </Button>
+        <Button onClick={() => window.print()}>
+          <Download className="size-4" />
+          {dictionary.common.exportPdf}
+        </Button>
+      </header>
+      <main className="flex-1 overflow-hidden">
+        {TemplatePreview ? <TemplatePreview /> : null}
+      </main>
+    </div>
+  )
+}
+
+export function ResumePreviewScreen({ resumeId, locale }: ResumePreviewScreenProps) {
+  return (
     <ResumeProvider
-      initialData={
-        createDemoResumeData(resumeId, template.id, locale)
-      }
+      initialData={createEmptyResumeData(undefined, locale)}
       storageKey={`resume-editor-data:${resumeId}`}
       resumeId={resumeId}
     >
-      <div className="flex min-h-screen flex-col bg-slate-100">
-        <header className="no-print flex h-16 items-center justify-between border-b bg-card px-5">
-          <Button variant="outline" asChild>
-            <Link href={`/editor/${resumeId}`}>
-              <ArrowLeft className="size-4" />
-              {dictionary.editor.backToEditor}
-            </Link>
-          </Button>
-          <Button onClick={() => window.print()}>
-            <Download className="size-4" />
-            {dictionary.common.exportPdf}
-          </Button>
-        </header>
-        <main className="flex-1 overflow-hidden">
-          <ResumePreview />
-        </main>
-      </div>
+      <ResumePreviewScreenContent resumeId={resumeId} />
     </ResumeProvider>
   )
 }

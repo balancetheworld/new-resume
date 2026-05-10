@@ -1,8 +1,9 @@
 'use client'
 
 import React, { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react'
-import { createDemoResumeData, createEmptyResumeData } from '@/lib/resume-data'
+import { createEmptyResumeData } from '@/lib/resume-data'
 import { setLastResumeId, upsertResumeIndexItem } from '@/lib/resume-storage'
+import type { ResumeStyle } from '@/lib/resume-style'
 
 // Types
 export interface PersonalInfo {
@@ -17,6 +18,9 @@ export interface PersonalInfo {
   phone: string
   github: string
   portfolio: string
+  photo: string
+  campusExperience: string
+  selfEvaluation: string
 }
 
 export interface WorkExperience {
@@ -59,14 +63,6 @@ export interface Project {
 }
 
 export type ResumeStatus = 'editing' | 'draft' | 'exported'
-
-export interface ResumeStyle {
-  accentColor: string
-  fontFamily: 'inter' | 'noto-sans-sc' | 'georgia'
-  density: 'tight' | 'fit' | 'airy'
-  margin: 'slim' | 'normal' | 'wide'
-  highlight: Array<'none' | 'sections' | 'header'>
-}
 
 export interface ResumeData {
   resumeName: string
@@ -115,11 +111,10 @@ type ResumeAction =
 
 const generateId = () => Math.random().toString(36).substring(2, 11)
 
-const defaultResumeData: ResumeData = {
-  ...createDemoResumeData(),
-}
-
 function normalizeResumeData(data: Partial<ResumeData>): ResumeData {
+  const defaultResumeData: ResumeData = {
+    ...createEmptyResumeData(),
+  }
   const legacyPersonalInfo = (data.personalInfo ?? {}) as Partial<PersonalInfo> & {
     title?: string
   }
@@ -392,7 +387,7 @@ export function ResumeProvider({
   resumeId?: string
 }) {
   const [state, dispatch] = useReducer(resumeReducer, {
-    data: normalizeResumeData(initialData ?? defaultResumeData),
+    data: normalizeResumeData(initialData ?? createEmptyResumeData()),
     saveStatus: 'saved',
     lastSaved: null,
   })
