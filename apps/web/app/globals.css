@@ -139,7 +139,26 @@
     display: none !important;
   }
 
+  .folio-grid-bg {
+    background: transparent !important;
+    height: auto !important;
+  }
+
+  .folio-grid-bg > div {
+    overflow: visible !important;
+    flex: none !important;
+  }
+
+  .folio-grid-bg > div > div {
+    min-height: auto !important;
+    min-width: 0 !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding: 0 !important;
+  }
+
   .resume-preview {
+    border: 0 !important;
     box-shadow: none !important;
     margin: 0 !important;
     width: 210mm !important;
@@ -147,6 +166,5 @@
     min-height: 297mm !important;
     aspect-ratio: auto !important;
     border-radius: 0 !important;
-    padding: 12mm !important;
   }
 }
