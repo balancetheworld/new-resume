@@ -11,7 +11,7 @@ export function createEmptyResumeData(templateId?: string, locale: Locale = defa
   const dictionary = getMessages(locale)
 
   return {
-    resumeName: dictionary.data.resumes.defaultName,
+    resumeName: template.name,
     templateId: template.id,
     templateName: template.name,
     personalInfo: {
@@ -27,8 +27,8 @@ export function createEmptyResumeData(templateId?: string, locale: Locale = defa
       github: '',
       portfolio: '',
       photo: '',
-      campusExperience: '',
-      selfEvaluation: '',
+      campusExperiences: [{ id: generateId(), content: '' }],
+      selfEvaluations: [{ id: generateId(), content: '' }],
     },
     workExperience: [
       {

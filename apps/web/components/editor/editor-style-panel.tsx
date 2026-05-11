@@ -1,9 +1,6 @@
 'use client'
 
-import Link from 'next/link'
 import { useResume } from '@/lib/resume-context'
-import { Button } from '@/components/ui/button'
-import { getResumeTemplate } from '@/lib/resume-templates'
 import { useI18n } from '@/lib/i18n/context'
 
 const accentColors = ['#4F86DF', '#2563EB', '#5F82D8', '#3F8CFF', '#185FA5', '#0EA5E9']
@@ -15,18 +12,9 @@ const fontOptions = [
 ]
 
 export function EditorStylePanel() {
-  const { state, updateStyle, updateTemplate } = useResume()
+  const { state, updateStyle } = useResume()
   const { style } = state.data
-  const currentTemplate = getResumeTemplate(state.data.templateId)
   const { dictionary } = useI18n()
-
-  const handleApplyCurrentTemplate = () => {
-    updateTemplate({
-      templateId: currentTemplate.id,
-      templateName: currentTemplate.name,
-      style: currentTemplate.style,
-    })
-  }
 
   return (
     <div className="flex h-full flex-col bg-transparent">
@@ -36,33 +24,6 @@ export function EditorStylePanel() {
       </div>
 
       <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5">
-        <div className="space-y-3">
-          <div className="text-sm font-medium text-foreground">{dictionary.editor.template}</div>
-          <div className="rounded-2xl border border-white/45 bg-white/60 p-4 shadow-[0_12px_28px_rgba(59,87,133,0.07)] backdrop-blur-sm">
-            <div className="h-24 rounded-xl border border-[#d9e5f6] bg-[#feffff] p-3 shadow-[0_8px_18px_rgba(83,116,173,0.06)]">
-              <div className="h-2.5 w-16 rounded-full bg-slate-900" />
-              <div className="mt-2 h-2 w-12 rounded-full bg-primary/80" />
-              <div className="mt-4 space-y-1.5">
-                <div className="h-1.5 rounded-full bg-slate-200" />
-                <div className="h-1.5 w-10/12 rounded-full bg-slate-200" />
-                <div className="h-1.5 w-8/12 rounded-full bg-slate-200" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center justify-between">
-              <div>
-                <div className="text-sm font-medium text-foreground">{currentTemplate.name}</div>
-                <div className="text-xs text-muted-foreground">{dictionary.editor.currentTemplate}</div>
-              </div>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/templates">{dictionary.common.change}</Link>
-              </Button>
-            </div>
-            <Button variant="secondary" size="sm" className="mt-3 w-full" onClick={handleApplyCurrentTemplate}>
-              {dictionary.editor.applyCurrentTemplate}
-            </Button>
-          </div>
-        </div>
-
         <div className="space-y-3">
           <div className="text-sm font-medium text-foreground">{dictionary.editor.palette}</div>
           <div className="flex items-center gap-3">
