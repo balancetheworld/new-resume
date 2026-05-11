@@ -29,7 +29,7 @@ function ResumeEditorContent({
 
   return (
     <div className="flex h-screen min-h-0 flex-col bg-background">
-      <FloatingWorkspaceMenu resumeId={resumeId} />
+      <FloatingWorkspaceMenu resumeId={resumeId} variant="editor" />
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <aside className="no-print group relative hidden min-h-0 min-w-0 flex-1 overflow-hidden border-r border-white/45 bg-card/82 shadow-[inset_-1px_0_0_rgba(79,134,223,0.06)] backdrop-blur-sm lg:flex lg:flex-col">
           <div className="relative z-10 min-h-0 flex-1">

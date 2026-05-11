@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/site/language-switcher'
 import { useI18n } from '@/lib/i18n/context'
-import { Download, Eye, Menu, X } from 'lucide-react'
+import { ArrowLeft, Download, Eye, GripVertical, Menu, X } from 'lucide-react'
 
 interface Position {
   x: number
@@ -25,12 +25,15 @@ const FLOATING_MENU_POSITION_KEY = 'floating-workspace-menu-position'
 
 interface FloatingWorkspaceMenuProps {
   resumeId?: string
+  variant?: 'site' | 'editor' | 'preview'
 }
 
-export function FloatingWorkspaceMenu({ resumeId }: FloatingWorkspaceMenuProps) {
+const FLOATING_MENU_SIZE = 268
+
+export function FloatingWorkspaceMenu({ resumeId, variant = 'site' }: FloatingWorkspaceMenuProps) {
   const { dictionary } = useI18n()
   const pathname = usePathname()
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(true)
   const [position, setPosition] = useState<Position | null>(null)
   const dragStateRef = useRef<DragState>({
     pointerId: null,
@@ -46,11 +49,29 @@ export function FloatingWorkspaceMenu({ resumeId }: FloatingWorkspaceMenuProps) 
     { href: '/templates', label: dictionary.nav.templates },
     { href: '/builder', label: dictionary.nav.builder },
     { href: '/resumes', label: dictionary.nav.resumes },
-  ]
+  ] as const
 
   const handleDownload = () => {
     window.print()
+  }
+
+  const handleOpen = () => {
+    setIsOpen(true)
+  }
+
+  const handleClose = () => {
     setIsOpen(false)
+  }
+
+  const isEditorArea = pathname === '/' || pathname.startsWith('/editor') || pathname.startsWith('/preview')
+  const isEditorVariant = variant === 'editor'
+
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return isEditorArea
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`)
   }
 
   useEffect(() => {
@@ -58,7 +79,7 @@ export function FloatingWorkspaceMenu({ resumeId }: FloatingWorkspaceMenuProps) 
 
     if (!savedPosition) {
       setPosition({
-        x: window.innerWidth - 56,
+        x: window.innerWidth - FLOATING_MENU_SIZE - 16,
         y: 16,
       })
       return
@@ -66,8 +87,8 @@ export function FloatingWorkspaceMenu({ resumeId }: FloatingWorkspaceMenuProps) 
 
     try {
       const parsed = JSON.parse(savedPosition) as Position
-      const maxX = Math.max(16, window.innerWidth - 56)
-      const maxY = Math.max(16, window.innerHeight - 56)
+      const maxX = Math.max(16, window.innerWidth - FLOATING_MENU_SIZE - 16)
+      const maxY = Math.max(16, window.innerHeight - FLOATING_MENU_SIZE - 16)
 
       setPosition({
         x: Math.min(maxX, Math.max(16, parsed.x)),
@@ -75,7 +96,7 @@ export function FloatingWorkspaceMenu({ resumeId }: FloatingWorkspaceMenuProps) 
       })
     } catch {
       setPosition({
-        x: window.innerWidth - 56,
+        x: window.innerWidth - FLOATING_MENU_SIZE - 16,
         y: 16,
       })
     }
@@ -96,8 +117,8 @@ export function FloatingWorkspaceMenu({ resumeId }: FloatingWorkspaceMenuProps) 
           return currentPosition
         }
 
-        const maxX = Math.max(16, window.innerWidth - 56)
-        const maxY = Math.max(16, window.innerHeight - 56)
+        const maxX = Math.max(16, window.innerWidth - FLOATING_MENU_SIZE - 16)
+        const maxY = Math.max(16, window.innerHeight - FLOATING_MENU_SIZE - 16)
 
         return {
           x: Math.min(maxX, Math.max(16, currentPosition.x)),
@@ -143,8 +164,8 @@ export function FloatingWorkspaceMenu({ resumeId }: FloatingWorkspaceMenuProps) 
         return
       }
 
-      const maxX = Math.max(16, window.innerWidth - 56)
-      const maxY = Math.max(16, window.innerHeight - 56)
+      const maxX = Math.max(16, window.innerWidth - FLOATING_MENU_SIZE - 16)
+      const maxY = Math.max(16, window.innerHeight - FLOATING_MENU_SIZE - 16)
 
       setPosition({
         x: Math.min(maxX, Math.max(16, dragState.origin.x + deltaX)),
@@ -185,78 +206,134 @@ export function FloatingWorkspaceMenu({ resumeId }: FloatingWorkspaceMenuProps) 
     }
   }
 
-  const handleToggle = () => {
+  const handleHeaderClick = () => {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false
+      return
+    }
+  }
+
+  const handleBallClick = () => {
     if (suppressClickRef.current) {
       suppressClickRef.current = false
       return
     }
 
-    setIsOpen((value) => !value)
+    handleOpen()
   }
 
   return (
     <div
       className="no-print fixed z-50"
-      style={position ? { left: position.x, top: position.y } : { right: 16, top: 16 }}
+      style={position ? { left: position.x, top: position.y } : { right: 0, top: 0 }}
     >
-      {isOpen && (
-        <div className="absolute right-full top-0 mr-2 w-[220px] rounded-2xl border-1 border-[rgba(79,134,223,0.4)] bg-card/92 p-3 shadow-[0_16px_28px_rgba(59,87,133,0.12)] backdrop-blur-md">
-          <div className="space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`block rounded-lg border px-3 py-2 text-[12px] font-medium transition-colors ${
-                  pathname === item.href
-                    ? 'border-primary bg-primary/8 text-primary'
-                    : 'border-transparent text-foreground hover:bg-accent'
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-          <div className="my-3 h-px bg-border" />
-          {resumeId && (
-            <Button
-              variant="outline"
-              className="mb-2 w-full justify-start text-[12px]"
-              asChild
+      <div className={`relative ${isEditorVariant ? 'h-[245px] w-[252px]' : 'h-[220px] w-[236px]'}`}>
+        <div
+          className={`absolute inset-0 flex flex-col overflow-hidden rounded-3xl border border-[rgba(79,134,223,0.24)] bg-card/92 shadow-[0_14px_28px_rgba(59,87,133,0.16),0_0_0_1px_rgba(79,134,223,0.06)] backdrop-blur-md transition-all duration-300 ease-out ${
+            isOpen ? 'pointer-events-auto translate-y-0 scale-100 opacity-100' : 'pointer-events-none translate-y-2 scale-95 opacity-0'
+          }`}
+        >
+          <div className="flex h-9 items-center justify-between border-b border-white/60 px-3">
+            <button
+              type="button"
+              className="flex items-center gap-1 text-[11px] font-medium text-primary"
+              onPointerDown={handlePointerDown}
             >
-              <Link href={`/preview/${resumeId}`} onClick={() => setIsOpen(false)}>
-                <Eye className="size-4" />
-                {dictionary.common.preview}
-              </Link>
+              <GripVertical className="size-3.5" />
+              <span>移动</span>
+            </button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-7 rounded-full text-primary hover:bg-primary/10 hover:text-primary"
+              onClick={handleClose}
+            >
+              <X className="size-4" />
             </Button>
-          )}
+          </div>
+
+          <div className={`flex flex-1 flex-col gap-2 ${isEditorVariant ? 'p-2' : 'p-2.5'}`}>
+            <div className='grid gap-2 grid-cols-2 '>
+              {navItems.map((item, index) => {
+                const active = isActive(item.href)
+
+                return (
+                  <Button
+                    key={item.href}
+                    variant={active ? 'default' : 'outline'}
+                    asChild
+                    className={`h-11 justify-start rounded-2xl px-3 py-2 text-left shadow-none ${
+                      active ? 'bg-primary text-primary-foreground hover:bg-primary' : ''
+                    }`}
+                  >
+                    <Link href={item.href}>
+                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/15 text-[10px] font-semibold">
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                      <span className="text-[10px] font-medium leading-none">{item.label}</span>
+                    </Link>
+                  </Button>
+                )
+              })}
+            </div>
+
+            <div className={`mt-auto ${isEditorVariant ? 'space-y-3' : 'space-y-1'}`}>
+              <div className={`rounded-2xl border border-dashed border-[rgba(79,134,223,0.2)] bg-background/70 ${isEditorVariant ? 'p-1' : 'p-2'}`}>
+                <LanguageSwitcher />
+              </div>
+
+              {variant !== 'site' && resumeId && (
+                <div className='grid gap-2 grid-cols-2 '>
+                  {variant === 'editor' ? (
+                    <Button variant="outline" asChild className="h-7 rounded-xl px-2 text-[11px] shadow-none">
+                      <Link href={`/preview/${resumeId}`}>
+                        <Eye className="size-3.5" />
+                        {dictionary.common.preview}
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button variant="outline" asChild className="h-8 rounded-xl text-[12px] shadow-none">
+                      <Link href={`/editor/${resumeId}`}>
+                        <ArrowLeft className="size-3" />
+                        {dictionary.editor.backToEditor}
+                      </Link>
+                    </Button>
+                  )}
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={`h-7 rounded-xl px-2 text-[11px] shadow-none ${variant === 'editor' ? '' : ''}`}
+                    onClick={handleDownload}
+                  >
+                    <Download className="size-3" />
+                    {dictionary.common.exportPdf}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div
+          className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${
+            isOpen ? 'pointer-events-none translate-y-2 scale-75 opacity-0' : 'pointer-events-auto translate-y-0 scale-100 opacity-100'
+          }`}
+        >
           <Button
             type="button"
             variant="outline"
-            className="mb-3 w-full justify-start text-[12px]"
-            onClick={handleDownload}
+            size="icon"
+            className="size-12 rounded-full border-primary bg-primary text-white shadow-[0_14px_28px_rgba(59,87,133,0.16),0_0_0_1px_rgba(79,134,223,0.08)] backdrop-blur-md transition-transform duration-300 ease-out hover:scale-105 hover:bg-primary hover:text-white"
+            onPointerDown={handlePointerDown}
+            onClick={handleBallClick}
           >
-            <Download className="size-4" />
-            {dictionary.common.exportPdf}
+            <Menu className="size-5 text-white" />
           </Button>
-          <LanguageSwitcher />
         </div>
-      )}
-
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        className="relative size-11 touch-none rounded-full border-[rgba(79,134,223,0.24)] bg-white/96 text-primary shadow-[0_16px_30px_rgba(59,87,133,0.16),0_0_0_1px_rgba(79,134,223,0.08)] backdrop-blur-md transition-[transform,box-shadow,background-color] duration-200 ease-out hover:scale-[1.04] hover:bg-white hover:text-primary hover:shadow-[0_20px_36px_rgba(59,87,133,0.2),0_0_0_1px_rgba(79,134,223,0.12)]"
-        onPointerDown={handlePointerDown}
-        onClick={handleToggle}
-      >
-        <span className={`absolute inset-0 rounded-full ${isOpen ? '' : 'animate-pulse bg-[radial-gradient(circle,rgba(79,134,223,0.12)_0%,rgba(79,134,223,0.05)_45%,transparent_72%)]'}`} />
-        <span className="relative z-10">
-          {isOpen ? <X className="size-4" /> : <Menu className="size-4" />}
-        </span>
-        {!isOpen && <span className="absolute right-2 top-2 z-10 size-2 rounded-full bg-primary ring-2 ring-white" />}
-      </Button>
+      </div>
     </div>
   )
 }

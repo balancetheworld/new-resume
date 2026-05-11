@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { SiteHeader } from '@/components/site/site-header'
+import { FloatingWorkspaceMenu } from '@/components/editor/floating-workspace-menu'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -35,7 +35,7 @@ export default function ResumesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader current="resumes" />
+      <FloatingWorkspaceMenu variant="site" />
       <main className="mx-auto max-w-[1200px] px-6 py-8">
         <section className="flex items-start justify-between gap-6">
           <div>
