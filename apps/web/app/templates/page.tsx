@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect } from 'react'
-import { SiteHeader } from '@/components/site/site-header'
+import { FloatingWorkspaceMenu } from '@/components/editor/floating-workspace-menu'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,7 +23,7 @@ export default function TemplatesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader current="templates" />
+      <FloatingWorkspaceMenu variant="site" />
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
         <section className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>

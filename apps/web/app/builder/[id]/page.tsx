@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { SiteHeader } from '@/components/site/site-header'
+import { FloatingWorkspaceMenu } from '@/components/editor/floating-workspace-menu'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,8 +27,8 @@ export default function BuilderDetailPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader current="builder" />
-      <main className="grid min-h-[calc(100vh-4rem)] grid-cols-1 xl:grid-cols-[220px_1fr_260px]">
+      <FloatingWorkspaceMenu variant="site" />
+      <main className="grid min-h-screen grid-cols-1 xl:grid-cols-[220px_1fr_260px]">
         <aside className="border-r bg-card px-4 py-5">
           <div className="text-sm font-semibold text-foreground">{dictionary.builder.components}</div>
           <div className="mt-4 space-y-2">

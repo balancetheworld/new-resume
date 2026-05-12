@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { SiteHeader } from '@/components/site/site-header'
+import { FloatingWorkspaceMenu } from '@/components/editor/floating-workspace-menu'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useI18n } from '@/lib/i18n/context'
@@ -11,7 +11,7 @@ export default function BuilderPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader current="builder" />
+      <FloatingWorkspaceMenu variant="site" />
       <main className="mx-auto max-w-7xl px-6 py-8">
         <Card className="rounded-3xl py-0 shadow-sm">
           <CardHeader className="px-6 py-6">
