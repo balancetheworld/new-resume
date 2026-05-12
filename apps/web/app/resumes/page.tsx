@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { FloatingWorkspaceMenu } from '@/components/editor/floating-workspace-menu'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { getResumeTemplateDefinition } from '@/lib/template-registry'
@@ -48,11 +47,6 @@ export default function ResumesPage() {
             <p className="mt-2 text-[11px] text-muted-foreground">
               {resumes.length > 0 ? `${resumes.length}` : '0'} {dictionary.resumes.subtitle}
             </p>
-          </div>
-          <div className="flex gap-3">
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/templates">{dictionary.resumes.startFromTemplate}</Link>
-            </Button>
           </div>
         </section>
 
@@ -102,7 +96,10 @@ export default function ResumesPage() {
                 <div className="text-center">
                   <div className="text-[20px] text-muted-foreground">+</div>
                   <div className="mt-2 text-[12px] font-medium text-foreground">
-                    {dictionary.resumes.startFromTemplate}
+                    {dictionary.resumes.createFirst}
+                  </div>
+                  <div className="mt-1 text-[11px] text-muted-foreground">
+                    {dictionary.resumes.goToTemplates}
                   </div>
                 </div>
               </Card>
