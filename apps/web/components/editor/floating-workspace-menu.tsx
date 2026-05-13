@@ -2,12 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useContext, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/site/language-switcher'
 import { useI18n } from '@/lib/i18n/context'
 import { ArrowLeft, Download, Eye, GripVertical, Menu, X } from 'lucide-react'
-
+import  { useFloatingNavFirstNavigationContext } from '../../context/floating-nav-first-navigation'
 interface Position {
   x: number
   y: number
@@ -28,13 +28,15 @@ interface FloatingWorkspaceMenuProps {
   variant?: 'site' | 'editor' | 'preview'
 }
 
-const FLOATING_MENU_SIZE = 268
+const BALL_SIZE = 48
+const SCREEN_PADDING = 16
 
 export function FloatingWorkspaceMenu({ resumeId, variant = 'site' }: FloatingWorkspaceMenuProps) {
   const { dictionary } = useI18n()
   const pathname = usePathname()
-  const [isOpen, setIsOpen] = useState(true)
+  const {isOpen, setIsOpen} = useFloatingNavFirstNavigationContext()
   const [position, setPosition] = useState<Position | null>(null)
+  const [openDirection, setOpenDirection] = useState<'left' | 'right'>('right')
   const dragStateRef = useRef<DragState>({
     pointerId: null,
     startX: 0,
@@ -43,6 +45,46 @@ export function FloatingWorkspaceMenu({ resumeId, variant = 'site' }: FloatingWo
     moved: false,
   })
   const suppressClickRef = useRef(false)
+  const menuWidth = variant === 'editor' ? 252 : 236
+  const menuHeight = variant === 'editor' ? 245 : 220
+
+  const clampValue = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
+
+  const resolveOpenDirection = (anchorX: number) => {
+    const spaceRight = window.innerWidth - anchorX - BALL_SIZE - SCREEN_PADDING
+    const spaceLeft = anchorX - SCREEN_PADDING
+    const leftNeeded = menuWidth - BALL_SIZE
+
+    if (spaceRight < menuWidth && spaceLeft >= leftNeeded) {
+      return 'left'
+    }
+
+    if (spaceLeft < leftNeeded && spaceRight >= menuWidth) {
+      return 'right'
+    }
+
+    return spaceRight >= spaceLeft ? 'right' : 'left'
+  }
+
+  const getBounds = (open: boolean, direction: 'left' | 'right') => {
+    const maxY = Math.max(SCREEN_PADDING, window.innerHeight - (open ? menuHeight : BALL_SIZE) - SCREEN_PADDING)
+
+    if (!open) {
+      const minX = SCREEN_PADDING
+      const maxX = Math.max(minX, window.innerWidth - BALL_SIZE - SCREEN_PADDING)
+      return { minX, maxX, minY: SCREEN_PADDING, maxY }
+    }
+
+    if (direction === 'right') {
+      const minX = SCREEN_PADDING
+      const maxX = Math.max(minX, window.innerWidth - menuWidth - SCREEN_PADDING)
+      return { minX, maxX, minY: SCREEN_PADDING, maxY }
+    }
+
+    const minX = SCREEN_PADDING + (menuWidth - BALL_SIZE)
+    const maxX = Math.max(minX, window.innerWidth - BALL_SIZE - SCREEN_PADDING)
+    return { minX, maxX, minY: SCREEN_PADDING, maxY }
+  }
 
   const navItems = [
     { href: '/', label: dictionary.nav.editor },
@@ -77,28 +119,39 @@ export function FloatingWorkspaceMenu({ resumeId, variant = 'site' }: FloatingWo
   useEffect(() => {
     const savedPosition = window.localStorage.getItem(FLOATING_MENU_POSITION_KEY)
 
+    const settlePosition = (nextPosition: Position) => {
+      const direction = resolveOpenDirection(nextPosition.x)
+      const bounds = getBounds(isOpen, direction)
+
+      setOpenDirection(direction)
+
+      return {
+        x: clampValue(nextPosition.x, bounds.minX, bounds.maxX),
+        y: clampValue(nextPosition.y, bounds.minY, bounds.maxY),
+      }
+    }
+
     if (!savedPosition) {
-      setPosition({
-        x: window.innerWidth - FLOATING_MENU_SIZE - 16,
-        y: 16,
-      })
+      setPosition(
+        settlePosition({
+          x: window.innerWidth - BALL_SIZE - SCREEN_PADDING,
+          y: SCREEN_PADDING,
+        })
+      )
       return
     }
 
     try {
       const parsed = JSON.parse(savedPosition) as Position
-      const maxX = Math.max(16, window.innerWidth - FLOATING_MENU_SIZE - 16)
-      const maxY = Math.max(16, window.innerHeight - FLOATING_MENU_SIZE - 16)
 
-      setPosition({
-        x: Math.min(maxX, Math.max(16, parsed.x)),
-        y: Math.min(maxY, Math.max(16, parsed.y)),
-      })
+      setPosition(settlePosition(parsed))
     } catch {
-      setPosition({
-        x: window.innerWidth - FLOATING_MENU_SIZE - 16,
-        y: 16,
-      })
+      setPosition(
+        settlePosition({
+          x: window.innerWidth - BALL_SIZE - SCREEN_PADDING,
+          y: SCREEN_PADDING,
+        })
+      )
     }
   }, [])
 
@@ -117,12 +170,14 @@ export function FloatingWorkspaceMenu({ resumeId, variant = 'site' }: FloatingWo
           return currentPosition
         }
 
-        const maxX = Math.max(16, window.innerWidth - FLOATING_MENU_SIZE - 16)
-        const maxY = Math.max(16, window.innerHeight - FLOATING_MENU_SIZE - 16)
+        const direction = resolveOpenDirection(currentPosition.x)
+        const bounds = getBounds(isOpen, direction)
+
+        setOpenDirection(direction)
 
         return {
-          x: Math.min(maxX, Math.max(16, currentPosition.x)),
-          y: Math.min(maxY, Math.max(16, currentPosition.y)),
+          x: clampValue(currentPosition.x, bounds.minX, bounds.maxX),
+          y: clampValue(currentPosition.y, bounds.minY, bounds.maxY),
         }
       })
     }
@@ -133,6 +188,24 @@ export function FloatingWorkspaceMenu({ resumeId, variant = 'site' }: FloatingWo
       window.removeEventListener('resize', handleResize)
     }
   }, [])
+
+  useEffect(() => {
+    setPosition((currentPosition) => {
+      if (!currentPosition) {
+        return currentPosition
+      }
+
+      const direction = resolveOpenDirection(currentPosition.x)
+      const bounds = getBounds(isOpen, direction)
+
+      setOpenDirection(direction)
+
+      return {
+        x: clampValue(currentPosition.x, bounds.minX, bounds.maxX),
+        y: clampValue(currentPosition.y, bounds.minY, bounds.maxY),
+      }
+    })
+  }, [isOpen])
 
   useEffect(() => {
     const resetDragState = () => {
@@ -164,12 +237,16 @@ export function FloatingWorkspaceMenu({ resumeId, variant = 'site' }: FloatingWo
         return
       }
 
-      const maxX = Math.max(16, window.innerWidth - FLOATING_MENU_SIZE - 16)
-      const maxY = Math.max(16, window.innerHeight - FLOATING_MENU_SIZE - 16)
+      const nextX = dragState.origin.x + deltaX
+      const nextY = dragState.origin.y + deltaY
+      const direction = resolveOpenDirection(nextX)
+      const bounds = getBounds(isOpen, direction)
+
+      setOpenDirection(direction)
 
       setPosition({
-        x: Math.min(maxX, Math.max(16, dragState.origin.x + deltaX)),
-        y: Math.min(maxY, Math.max(16, dragState.origin.y + deltaY)),
+        x: clampValue(nextX, bounds.minX, bounds.maxX),
+        y: clampValue(nextY, bounds.minY, bounds.maxY),
       })
     }
 
@@ -227,11 +304,16 @@ export function FloatingWorkspaceMenu({ resumeId, variant = 'site' }: FloatingWo
       className="no-print fixed z-50"
       style={position ? { left: position.x, top: position.y } : { right: 0, top: 0 }}
     >
-      <div className={`relative ${isEditorVariant ? 'h-[245px] w-[252px]' : 'h-[220px] w-[236px]'}`}>
+      <div className="relative" style={{ width: BALL_SIZE, height: BALL_SIZE }}>
         <div
-          className={`absolute inset-0 flex flex-col overflow-hidden rounded-3xl border border-[rgba(79,134,223,0.24)] bg-card/92 shadow-[0_14px_28px_rgba(59,87,133,0.16),0_0_0_1px_rgba(79,134,223,0.06)] backdrop-blur-md transition-all duration-300 ease-out ${
+          className={`absolute flex flex-col overflow-hidden rounded-3xl border border-[rgba(79,134,223,0.24)] bg-card/92 shadow-[0_14px_28px_rgba(59,87,133,0.16),0_0_0_1px_rgba(79,134,223,0.06)] backdrop-blur-md transition-all duration-300 ease-out ${
             isOpen ? 'pointer-events-auto translate-y-0 scale-100 opacity-100' : 'pointer-events-none translate-y-2 scale-95 opacity-0'
           }`}
+          style={{
+            width: menuWidth,
+            height: menuHeight,
+            ...(openDirection === 'left' ? { right: 0 } : { left: 0 }),
+          }}
         >
           <div className="flex h-9 items-center justify-between border-b border-white/60 px-3">
             <button

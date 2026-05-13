@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import { getI18n } from '@/lib/i18n/server'
 import { ResumeStorageReset } from '@/components/app/resume-storage-reset'
 import { I18nProvider } from '@/lib/i18n/context'
+import { FloatingNavFirstNavigationProvider } from '@/context/floating-nav-first-navigation'
 import './globals.css'
 
 const inter = Inter({
@@ -41,8 +42,10 @@ export default async function RootLayout({
     <html lang={locale} className={`${inter.variable} bg-background`}>
       <body className="min-w-[1280px] font-sans antialiased">
         <I18nProvider locale={locale} dictionary={dictionary}>
-          <ResumeStorageReset />
-          {children}
+          <FloatingNavFirstNavigationProvider>
+            <ResumeStorageReset />
+            {children}
+          </FloatingNavFirstNavigationProvider>
         </I18nProvider>
       </body>
     </html>
