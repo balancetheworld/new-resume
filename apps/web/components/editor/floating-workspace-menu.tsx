@@ -2,12 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useContext, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/site/language-switcher'
 import { useI18n } from '@/lib/i18n/context'
 import { ArrowLeft, Download, Eye, GripVertical, Menu, X } from 'lucide-react'
-
+import  { useFloatingNavFirstNavigationContext } from '../../context/floating-nav-first-navigation'
 interface Position {
   x: number
   y: number
@@ -33,7 +33,7 @@ const FLOATING_MENU_SIZE = 268
 export function FloatingWorkspaceMenu({ resumeId, variant = 'site' }: FloatingWorkspaceMenuProps) {
   const { dictionary } = useI18n()
   const pathname = usePathname()
-  const [isOpen, setIsOpen] = useState(true)
+  const {isOpen, setIsOpen} = useFloatingNavFirstNavigationContext()
   const [position, setPosition] = useState<Position | null>(null)
   const dragStateRef = useRef<DragState>({
     pointerId: null,
