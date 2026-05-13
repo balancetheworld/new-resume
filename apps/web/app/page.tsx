@@ -1,14 +1,5 @@
-import { EditorEntry } from '@/components/editor/editor-entry'
-import { FloatingWorkspaceMenu } from '@/components/editor/floating-workspace-menu'
-import { getLocale } from '@/lib/i18n/server'
+import { redirect } from 'next/navigation'
 
 export default async function Home() {
-  const locale = await getLocale()
-
-  return (
-    <>
-      <FloatingWorkspaceMenu variant="site" />
-      <EditorEntry locale={locale} />
-    </>
-  )
+  redirect('/resumes')
 }
