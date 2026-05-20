@@ -37,15 +37,35 @@ export function SalesTemplatePreview() {
 
             <section className="mt-8">
               <h2 className="text-lg font-semibold text-primary">{dictionary.preview.campusExperience}</h2>
-              <div className="mt-3 text-sm leading-7 text-foreground/85">
-                {personalInfo.campusExperience || dictionary.preview.fillCampusExperience}
+              <div className="mt-3 space-y-3">
+                {personalInfo.campusExperiences.length > 0 ? (
+                  personalInfo.campusExperiences.map((exp, index) => (
+                    <div key={exp.id} className="text-sm leading-7 text-foreground/85">
+                      {exp.content || dictionary.preview.fillCampusExperience}
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm leading-7 text-foreground/85">
+                    {dictionary.preview.fillCampusExperience}
+                  </div>
+                )}
               </div>
             </section>
 
             <section className="mt-8">
               <h2 className="text-lg font-semibold text-primary">{dictionary.preview.selfEvaluation}</h2>
-              <div className="mt-3 text-sm leading-7 text-foreground/85">
-                {personalInfo.selfEvaluation || dictionary.preview.fillSelfEvaluation}
+              <div className="mt-3 space-y-3">
+                {personalInfo.selfEvaluations.length > 0 ? (
+                  personalInfo.selfEvaluations.map((evaluation) => (
+                    <div key={evaluation.id} className="text-sm leading-7 text-foreground/85">
+                      {evaluation.content || dictionary.preview.fillSelfEvaluation}
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm leading-7 text-foreground/85">
+                    {dictionary.preview.fillSelfEvaluation}
+                  </div>
+                )}
               </div>
             </section>
           </div>

@@ -19,8 +19,18 @@ export interface PersonalInfo {
   github: string
   portfolio: string
   photo: string
-  campusExperience: string
-  selfEvaluation: string
+  campusExperiences: CampusExperience[]
+  selfEvaluations: SelfEvaluation[]
+}
+
+export interface CampusExperience {
+  id: string
+  content: string
+}
+
+export interface SelfEvaluation {
+  id: string
+  content: string
 }
 
 export interface WorkExperience {
@@ -105,6 +115,12 @@ type ResumeAction =
   | { type: 'ADD_PROJECT' }
   | { type: 'REMOVE_PROJECT'; payload: string }
   | { type: 'UPDATE_STYLE'; payload: Partial<ResumeStyle> }
+  | { type: 'UPDATE_CAMPUS_EXPERIENCE'; payload: { id: string; content: string } }
+  | { type: 'ADD_CAMPUS_EXPERIENCE' }
+  | { type: 'REMOVE_CAMPUS_EXPERIENCE'; payload: string }
+  | { type: 'UPDATE_SELF_EVALUATION'; payload: { id: string; content: string } }
+  | { type: 'ADD_SELF_EVALUATION' }
+  | { type: 'REMOVE_SELF_EVALUATION'; payload: string }
   | { type: 'SET_SAVE_STATUS'; payload: SaveStatus }
   | { type: 'SET_LAST_SAVED'; payload: Date }
   | { type: 'LOAD_DATA'; payload: ResumeData }
@@ -117,7 +133,18 @@ function normalizeResumeData(data: Partial<ResumeData>): ResumeData {
   }
   const legacyPersonalInfo = (data.personalInfo ?? {}) as Partial<PersonalInfo> & {
     title?: string
+    campusExperience?: string
+    selfEvaluation?: string
   }
+
+  // 向后兼容：将旧的字符串格式转换为数组格式
+  const campusExperiences = legacyPersonalInfo.campusExperience
+    ? [{ id: generateId(), content: legacyPersonalInfo.campusExperience }]
+    : data.personalInfo?.campusExperiences ?? defaultResumeData.personalInfo.campusExperiences
+
+  const selfEvaluations = legacyPersonalInfo.selfEvaluation
+    ? [{ id: generateId(), content: legacyPersonalInfo.selfEvaluation }]
+    : data.personalInfo?.selfEvaluations ?? defaultResumeData.personalInfo.selfEvaluations
 
   return {
     ...defaultResumeData,
@@ -125,6 +152,8 @@ function normalizeResumeData(data: Partial<ResumeData>): ResumeData {
     personalInfo: {
       ...defaultResumeData.personalInfo,
       ...data.personalInfo,
+      campusExperiences,
+      selfEvaluations,
       jobTitle: data.personalInfo?.jobTitle ?? legacyPersonalInfo.title ?? defaultResumeData.personalInfo.jobTitle,
     },
     workExperience: data.workExperience ?? defaultResumeData.workExperience,
@@ -340,6 +369,88 @@ function resumeReducer(state: ResumeState, action: ResumeAction): ResumeState {
         },
         saveStatus: 'unsaved',
       }
+    case 'UPDATE_CAMPUS_EXPERIENCE':
+      return {
+        ...state,
+        data: {
+          ...state.data,
+          personalInfo: {
+            ...state.data.personalInfo,
+            campusExperiences: state.data.personalInfo.campusExperiences.map((exp) =>
+              exp.id === action.payload.id ? { ...exp, content: action.payload.content } : exp
+            ),
+          },
+        },
+        saveStatus: 'unsaved',
+      }
+    case 'ADD_CAMPUS_EXPERIENCE':
+      return {
+        ...state,
+        data: {
+          ...state.data,
+          personalInfo: {
+            ...state.data.personalInfo,
+            campusExperiences: [
+              ...state.data.personalInfo.campusExperiences,
+              { id: generateId(), content: '' },
+            ],
+          },
+        },
+        saveStatus: 'unsaved',
+      }
+    case 'REMOVE_CAMPUS_EXPERIENCE':
+      return {
+        ...state,
+        data: {
+          ...state.data,
+          personalInfo: {
+            ...state.data.personalInfo,
+            campusExperiences: state.data.personalInfo.campusExperiences.filter((exp) => exp.id !== action.payload),
+          },
+        },
+        saveStatus: 'unsaved',
+      }
+    case 'UPDATE_SELF_EVALUATION':
+      return {
+        ...state,
+        data: {
+          ...state.data,
+          personalInfo: {
+            ...state.data.personalInfo,
+            selfEvaluations: state.data.personalInfo.selfEvaluations.map((evaluation) =>
+              evaluation.id === action.payload.id ? { ...evaluation, content: action.payload.content } : evaluation
+            ),
+          },
+        },
+        saveStatus: 'unsaved',
+      }
+    case 'ADD_SELF_EVALUATION':
+      return {
+        ...state,
+        data: {
+          ...state.data,
+          personalInfo: {
+            ...state.data.personalInfo,
+            selfEvaluations: [
+              ...state.data.personalInfo.selfEvaluations,
+              { id: generateId(), content: '' },
+            ],
+          },
+        },
+        saveStatus: 'unsaved',
+      }
+    case 'REMOVE_SELF_EVALUATION':
+      return {
+        ...state,
+        data: {
+          ...state.data,
+          personalInfo: {
+            ...state.data.personalInfo,
+            selfEvaluations: state.data.personalInfo.selfEvaluations.filter((evaluation) => evaluation.id !== action.payload),
+          },
+        },
+        saveStatus: 'unsaved',
+      }
     case 'SET_SAVE_STATUS':
       return { ...state, saveStatus: action.payload }
     case 'SET_LAST_SAVED':
@@ -369,6 +480,12 @@ interface ResumeContextValue {
   addProject: () => void
   removeProject: (id: string) => void
   updateStyle: (data: Partial<ResumeStyle>) => void
+  updateCampusExperience: (id: string, content: string) => void
+  addCampusExperience: () => void
+  removeCampusExperience: (id: string) => void
+  updateSelfEvaluation: (id: string, content: string) => void
+  addSelfEvaluation: () => void
+  removeSelfEvaluation: (id: string) => void
 }
 
 const ResumeContext = createContext<ResumeContextValue | null>(null)
@@ -503,6 +620,30 @@ export function ResumeProvider({
     dispatch({ type: 'UPDATE_STYLE', payload: data })
   }, [])
 
+  const updateCampusExperience = useCallback((id: string, content: string) => {
+    dispatch({ type: 'UPDATE_CAMPUS_EXPERIENCE', payload: { id, content } })
+  }, [])
+
+  const addCampusExperience = useCallback(() => {
+    dispatch({ type: 'ADD_CAMPUS_EXPERIENCE' })
+  }, [])
+
+  const removeCampusExperience = useCallback((id: string) => {
+    dispatch({ type: 'REMOVE_CAMPUS_EXPERIENCE', payload: id })
+  }, [])
+
+  const updateSelfEvaluation = useCallback((id: string, content: string) => {
+    dispatch({ type: 'UPDATE_SELF_EVALUATION', payload: { id, content } })
+  }, [])
+
+  const addSelfEvaluation = useCallback(() => {
+    dispatch({ type: 'ADD_SELF_EVALUATION' })
+  }, [])
+
+  const removeSelfEvaluation = useCallback((id: string) => {
+    dispatch({ type: 'REMOVE_SELF_EVALUATION', payload: id })
+  }, [])
+
   return (
     <ResumeContext.Provider
       value={{
@@ -523,6 +664,12 @@ export function ResumeProvider({
         addProject,
         removeProject,
         updateStyle,
+        updateCampusExperience,
+        addCampusExperience,
+        removeCampusExperience,
+        updateSelfEvaluation,
+        addSelfEvaluation,
+        removeSelfEvaluation,
       }}
     >
       {children}

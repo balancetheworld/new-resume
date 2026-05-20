@@ -108,3 +108,42 @@ export function clearAllResumeData() {
     localStorage.removeItem(key)
   })
 }
+
+export function deleteResume(resumeId: string) {
+  if (typeof window === 'undefined') return
+
+  // 删除简历数据
+  localStorage.removeItem(getResumeStorageKey(resumeId))
+
+  // 从索引中移除
+  const items = readResumeIndex()
+  const nextItems = items.filter((item) => item.id !== resumeId)
+  writeResumeIndex(nextItems)
+
+  // 如果删除的是最后打开的简历，清除记录
+  if (getLastResumeId() === resumeId) {
+    localStorage.removeItem(LAST_RESUME_ID_KEY)
+  }
+}
+
+export function renameResume(resumeId: string, newName: string) {
+  if (typeof window === 'undefined') return
+
+  const items = readResumeIndex()
+  const item = items.find((i) => i.id === resumeId)
+
+  if (!item) return
+
+  // 更新索引中的名称
+  const nextItems = items.map((i) =>
+    i.id === resumeId ? { ...i, name: newName } : i
+  )
+  writeResumeIndex(nextItems)
+
+  // 同时更新简历数据中的名称
+  const data = readResumeData(resumeId)
+  if (data) {
+    data.resumeName = newName
+    writeResumeData(resumeId, data)
+  }
+}
